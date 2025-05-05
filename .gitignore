@@ -1,0 +1,4 @@
+# .gitignore 文件内容
+node_modules/
+dist/
+.env
