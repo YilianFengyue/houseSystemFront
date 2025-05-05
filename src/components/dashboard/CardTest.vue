@@ -13,7 +13,7 @@
     <v-col cols="12" md="4">
       <v-card>
         <template v-slot:title>
-          This is a title
+          This is a title222
         </template>
 
         <template v-slot:subtitle>
