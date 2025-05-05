@@ -29,7 +29,7 @@ const scrollToTop = () => {
           
         </h1>
         <h1 class="text-h6 text-secondary mt-4 mx-auto">
-          开始寻找属于你的家
+          Git start!First
         </h1>
       </v-card>
       <div class="text-center mb-10">
