@@ -5,8 +5,8 @@
 //TestCard
 import CategoryCard from "@/components/dashboard/CategoryCard.vue";
 import BannerPage from "@/components/dashboard/BannerPage.vue";
-import CardTest from "~/src/components/dashboard/CardTest.vue";
-import HouseCarf from
+
+
 import Footer1 from "@/components/footer/Footer1.vue";
 import HouseCard from "~/src/components/dashboard/HouseCard.vue";
 onMounted(() => {
