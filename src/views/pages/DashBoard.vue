@@ -14,7 +14,7 @@ onMounted(() => {
 </script>
 <template>
   <div class="pa-5">
-     <!-- BannerPage############ -->
+     <!-- BannerPage############ yesgit-->
      <v-row class="flex-0" dense>
       <v-col cols="12" xl="4">
         <BannerPage></BannerPage>
