@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import ProductCard from "@/components/dashboard/ProductCard.vue";
-import CategoryCard from "@/components/dashboard/CategoryCard.vue";
+import HouseCard1 from "~/src/components/houseDetail/HouseCard1.vue";
 import { onMounted } from "vue";
 
 onMounted(() => {
@@ -12,7 +11,7 @@ onMounted(() => {
   <div class="pa-5">
     <v-row class="flex-0" dense>
       <v-col cols="12" xl="4">
-        <ProductCard />
+        <HouseCard1 />
       </v-col>
     </v-row>
   </div>
