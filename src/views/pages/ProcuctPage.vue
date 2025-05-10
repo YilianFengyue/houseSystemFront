@@ -14,6 +14,7 @@ onMounted(() => {
     <v-row class="flex-0" dense>
       <v-col cols="12" xl="4">
         <HouseCard1 />
+        
       </v-col>
       <v-col cols="12" xl="4">
         <Newsletter2 />
