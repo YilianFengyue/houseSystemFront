@@ -20,6 +20,16 @@ export default {
           icon: "mdi-view-dashboard-outline",
         },
         {
+          text: "房源管理",
+          link: "/landlord",
+          icon: "mdi-home-outline",
+        },
+        {
+          text: "新闻管理",
+          link: "/news",
+          icon: "mdi-newspaper",
+        },
+        {
           icon: "mdi-robot-excited-outline",
           text: "AI选购顾问",
           link: "/ai/chatbot_v1",
