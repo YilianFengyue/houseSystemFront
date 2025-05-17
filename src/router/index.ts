@@ -25,22 +25,6 @@ export const routes = [
     },
     component: () => import("@/views/pages/ProcuctPage.vue"),
   },
-    {
-    path: "/landlord",
-    meta: {
-      requiresAuth: true,
-      layout: "landing",
-    },
-    component: () => import("@/views/pages/LandlordProperties.vue"),
-  },
-    {
-    path: "/news",
-    meta: {
-      requiresAuth: true,
-      layout: "landing",
-    },
-    component: () => import("@/views/pages/NewsPage.vue"),
-  },
   {
     path: "/ai/chatbot_v1",
     component: () => import("@/views/chatgpt/ChatBotV1.vue"),
@@ -104,6 +88,31 @@ export const routes = [
     },
 
   },
+  {
+      path: "/new-page",
+      meta: {
+        requiresAuth: true,
+        layout: "landing",
+      },
+      component: () => import("@/views/pages/chatpage.vue"),
+    },
+    {
+      path: "/payPay",
+      meta: {
+        requiresAuth: true,
+        layout: "landing",
+      },
+      component: () => import("@/views/pages/PricingPage.vue"),
+    },
+    {
+      path: "/contract",
+      meta: {
+        requiresAuth: true,
+        layout: "landing",
+      },
+      component: () => import("@/views/pages/contractpage.vue"),
+    },
+
 
   ...LandingRoutes,
   ...AuthRoutes,

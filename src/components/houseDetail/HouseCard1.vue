@@ -1,5 +1,17 @@
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const rentValue = "10251" // 定义租金数据
+
+const navigateToContract = () => {
+  router.push({
+    path: '/contract',
+    query: { rent: rentValue } // 通过query参数传递
+  })
+}
+</script>
 
 <template>
   <v-card class="my-5" rounded>
@@ -48,7 +60,11 @@
             height="100%"
             class="mx-auto pa-5 pa-sm-10 pa-md-15"
           >
-            <RouterLink to="/" class="text-primary">10251元/平米</RouterLink>
+            <RouterLink to="/" class="text-primary">10251元/平米</RouterLink><br/>
+            <v-chip color="green" 
+                    variant="outlined"
+                    @click="navigateToContract"
+                    style="cursor: pointer">立即签约！</v-chip><br/>
             <h1 class="font-weight-black text-h3 mt-5 mb-10">
               <span class="text-red">108.4万</span>
               your startup

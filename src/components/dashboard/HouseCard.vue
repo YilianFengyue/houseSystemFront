@@ -28,7 +28,15 @@
                 1人关注 / 1个月以前发布
               </v-card-text>
               <v-card-text >
-                <v-chip color="red" variant="outlined">必看好房</v-chip>   <v-chip color="green" variant="outlined">随时看房</v-chip>
+                <v-chip color="red" variant="outlined">必看好房</v-chip> 
+                <v-chip color="green" variant="outlined" @click="showDatePicker = !showDatePicker">随时看房</v-chip>
+                      <v-row justify="space-around" v-if="showDatePicker">
+                        <v-date-picker
+                          color="primary"
+                          v-model="selectedDate"
+                        @update:modelValue="onDateSelected"
+                        ></v-date-picker>
+                      </v-row>
               </v-card-text>
             </v-col>
           </v-row>
@@ -120,3 +128,42 @@
       </v-col>
     </v-row>
   </template>
+
+  <script setup lang="ts">
+import { ref } from 'vue';
+
+const showDatePicker = ref(false);
+const selectedDate = ref(null);
+
+const onDateSelected = async (date: string | Date) => {
+  console.log("选择的日期是：", date);
+  //showDatePicker.value = false; / 选择后隐藏日期选择器
+
+try {
+    const response = await fetch('http://localhost:5000/HouseRent/appointments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        date: date,
+        property: "万科魅力之城武广新城" // 可以添加更多房产信息
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('网络响应不正常');
+    }
+
+    const data = await response.json();
+    console.log('后端响应:', data);
+    alert('预约日期提交成功！');
+    showDatePicker.value = false;
+  } catch (error) {
+    console.error('提交日期失败:', error);
+    alert('提交日期失败，请稍后再试');
+  }
+
+};
+
+</script>
