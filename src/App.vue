@@ -11,6 +11,9 @@
 </template>
 
 <script setup lang="ts">
+//图标库
+import { Icon } from "@iconify/vue";
+
 import UILayout from "@/layouts/UILayout.vue";
 import LandingLayout from "@/layouts/LandingLayout.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";

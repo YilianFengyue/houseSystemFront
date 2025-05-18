@@ -51,7 +51,7 @@ const scrollToBottom = () => {
       >
         <h1 class="logo-text h-full">
           <!-- <Icon class="mr-2" width="40" icon="solar:plain-bold-duotone" /> -->
-          <img src="../../assets/logo.png" width="40" />
+          <Icon icon="fluent-color:home-16" />
           <span>易找房</span>
         </h1>
       </v-card>
