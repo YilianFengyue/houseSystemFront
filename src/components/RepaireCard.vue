@@ -205,7 +205,7 @@ async function submitForm() {
       agreed_terms: checkbox.value
     }
     
-    const response = await fetch('http://localhost:5000/HouseRent/Repaire', {
+    const response = await fetch('http://localhost:5000/api/repair/new/repaires', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
