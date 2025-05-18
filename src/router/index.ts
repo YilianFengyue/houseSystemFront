@@ -18,6 +18,14 @@ export const routes = [
     component: () => import("@/views/pages/DashBoard.vue"),
   },
   {
+    path: "/testIndexPage1",
+    meta: {
+      requiresAuth: true,
+      layout: "landing",
+    },
+    component: () => import("@/views/pages/TestIndexPage.vue"),
+  },
+  {
     path: "/product",
     meta: {
       requiresAuth: true,

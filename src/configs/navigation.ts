@@ -30,6 +30,11 @@ export default {
           icon: "mdi-newspaper",
         },
         {
+          text: "测试页面",
+          link: "/testIndexPage1",
+          icon: "mdi-newspaper",
+        },
+        {
           icon: "mdi-robot-excited-outline",
           text: "AI选购顾问",
           link: "/ai/chatbot_v1",
