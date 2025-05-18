@@ -1,6 +1,5 @@
 <template>
   <div class="p-6">
-
     <!-- 顶部栏 -->
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-2xl font-bold text-gray-800">🏠 房源管理</h1>
@@ -9,24 +8,25 @@
 
     <!-- 房源表格 -->
     <el-table :data="properties" style="width: 100%" border stripe>
-      <el-table-column prop="address" label="地址" />
-      <el-table-column prop="type" label="类型" />
-      <el-table-column prop="area" label="面积 (㎡)" width="100" />
-      <el-table-column prop="rent" label="租金 (元/月)" width="120">
-        <template #default="{ row }">￥{{ row.rent }}</template>
-      </el-table-column>
-      <el-table-column prop="deposit" label="押金 (元)" width="100">
-        <template #default="{ row }">￥{{ row.deposit }}</template>
-      </el-table-column>
-      <el-table-column prop="decoration" label="装修" />
-      <el-table-column prop="status" label="状态" width="120" />
-      <el-table-column label="操作" width="160">
-        <template #default="scope">
-          <el-button type="primary" link @click="openForm(scope.row, scope.$index)">编辑</el-button>
-          <el-button type="danger" link @click="deleteProperty(scope.$index)">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+      <el-table-column prop="title" label="房源编号" min-width="40" />
+  <el-table-column prop="title" label="标题" min-width="120" />
+  <el-table-column prop="community" label="小区" min-width="120" />
+  <el-table-column prop="area" label="面积 (㎡)" width="100" />
+  <el-table-column prop="direction" label="朝向" width="80" />
+  <el-table-column prop="rooms" label="户型" width="120" />
+  <el-table-column prop="price" label="租金 (元/月)" width="120">
+    <template #default="{ row }">￥{{ row.price }}</template>
+  </el-table-column>
+  <el-table-column prop="decoration" label="装修" width="80" />
+  <el-table-column prop="rent_type" label="租赁方式" width="100" />
+  <el-table-column label="操作" width="160">
+    <template #default="scope">
+      <el-button type="primary" link @click="openForm(scope.row, scope.$index)">编辑</el-button>
+      <el-button type="danger" link @click="deleteProperty(scope.$index)">删除</el-button>
+    </template>
+  </el-table-column>
+</el-table>
+
 
     <!-- 空状态 -->
     <el-empty v-if="!properties.length" description="暂无房源信息" class="mt-10" />
@@ -38,69 +38,88 @@
       :width="dialogWidth"
       destroy-on-close
     >
-      <el-form :model="form" label-position="top" class="grid gap-4">
-        <el-form-item label="地址">
-          <el-input v-model="form.address" placeholder="请输入地址" />
-        </el-form-item>
+      <el-form ref="formRef" :model="form" label-position="top" class="grid grid-cols-1 gap-4">
+        <el-form-item label="房源编号" prop="title" :rules="[{ required: true, message: '请输入房源编号' }]" style="width: 500px;">
+  <el-input v-model="form.house_num" placeholder="请输入房源编号" />
+</el-form-item>
 
-        <el-form-item label="类型">
-          <el-input v-model="form.type" placeholder="如一居、二居等" />
-        </el-form-item>
+<el-form-item label="标题" prop="title" :rules="[{ required: true, message: '请输入标题' }]" style="width: 500px;">
+  <el-input v-model="form.title" placeholder="请输入标题" />
+</el-form-item>
 
-        <el-form-item label="面积（㎡）">
-          <el-input-number v-model="form.area" :min="0" :step="1" :controls="false" class="w-full" />
-        </el-form-item>
+<el-form-item label="区" prop="region" :rules="[{ required: true, message: '请输入所在区' }]" style="width: 500px;">
+  <el-input v-model="form.region" placeholder="请输入所在区" />
+</el-form-item>
 
-        <el-form-item label="租金（元/月）">
-          <el-input-number v-model="form.rent" :min="0" :step="1" :controls="false" class="w-full" />
-        </el-form-item>
+<el-form-item label="街道" prop="block" :rules="[{ required: true, message: '请输入街道' }]" style="width: 500px;">
+  <el-input v-model="form.block" placeholder="请输入街道" />
+</el-form-item>
 
-        <el-form-item label="押金（元）">
-          <el-input-number v-model="form.deposit" :min="0" :step="1" :controls="false" class="w-full" />
-        </el-form-item>
+<el-form-item label="小区" prop="community" :rules="[{ required: true, message: '请输入小区名' }]" style="width: 500px;">
+  <el-input v-model="form.community" placeholder="请输入小区名" />
+</el-form-item>
 
-        <el-form-item label="装修">
-          <el-input v-model="form.decoration" placeholder="如精装、简装等" />
-        </el-form-item>
+<el-form-item label="面积（㎡）" prop="area" :rules="[{ required: true, message: '请输入面积' }]" style="width: 500px;">
+  <el-input-number v-model="form.area" :min="0" :step="1" :controls="false" class="w-full" />
+</el-form-item>
 
-        <el-form-item label="房源状态">
-          <el-select v-model="form.status" placeholder="请选择状态" class="w-full">
-            <el-option label="空置" value="空置" />
-            <el-option label="出租中" value="出租中" />
-            <el-option label="维修中" value="维修中" />
-          </el-select>
-        </el-form-item>
+<el-form-item label="价格（元/月）" prop="price" :rules="[{ required: true, message: '请输入价格' }]" style="width: 500px;">
+  <el-input-number v-model="form.price" :min="0" :step="1" :controls="false" class="w-full" />
+</el-form-item>
 
-        <el-form-item label="房屋照片">
-          <el-upload
-            v-model:file-list="form.photos"
-            action="#"
-            list-type="picture-card"
-            :auto-upload="false"
-            accept="image/*"
-          >
-            <el-icon><Plus /></el-icon>
-            <template #file="{ file }">
-              <img :src="file.url" class="w-full h-full object-cover" />
-            </template>
-          </el-upload>
-        </el-form-item>
+<el-form-item label="租赁方式" prop="rent_type" :rules="[{ required: true, message: '请选择租赁方式' }]" style="width: 500px;">
+  <el-select v-model="form.rent_type" placeholder="请选择租赁方式">
+    <el-option label="整租" value="整租" />
+    <el-option label="合租" value="合租" />
+  </el-select>
+</el-form-item>
 
-        <el-form-item label="房屋视频">
+  <el-form-item label="装修情况">
+    <el-input v-model="form.decoration" placeholder="如精装" style="--el-input-width: 500px" />
+  </el-form-item>
+  <el-form-item label="是否近地铁">
+    <el-switch v-model="form.subway" :active-value="1" :inactive-value="0" />
+  </el-form-item>
+  <el-form-item label="是否随时看房">
+    <el-switch v-model="form.available" :active-value="1" :inactive-value="0" />
+  </el-form-item>
+  <el-form-item label="是否新上">
+    <el-switch v-model="form.tag_new" :active-value="1" :inactive-value="0" />
+  </el-form-item>
+  <el-form-item label="房东">
+    <el-input v-model="form.landlord" placeholder="请输入房东姓名" style="--el-input-width: 500px" />
+  </el-form-item>
+  <el-form-item label="房东电话">
+    <el-input v-model="form.phone_num" placeholder="请输入电话号码" style="--el-input-width: 500px" />
+  </el-form-item>
+        <el-form-item label="房源图片">
+        <el-upload
+          v-model:file-list="form.photos"
+          action="#"
+          list-type="picture-card"
+          :auto-upload="false"
+          accept="image/*"
+        >
+          <el-icon><Plus /></el-icon>
+          <template #file="{ file }">
+            <img :src="file.url" class="w-full h-full object-cover" />
+          </template>
+        </el-upload>
+        </el-form-item>
+        <el-form-item label="房源视频">
           <el-upload
             v-model:file-list="form.videos"
             action="#"
-            :limit="1"
+            list-type="text"
             :auto-upload="false"
             accept="video/*"
           >
-            <el-button type="primary">上传视频</el-button>
-            <template #tip>
-              <div class="el-upload__tip">仅支持一个视频，格式如 mp4</div>
-            </template>
+            <el-button>选择视频</el-button>
           </el-upload>
         </el-form-item>
       </el-form>
+
+
 
       <template #footer>
         <el-button @click="closeForm">取消</el-button>
@@ -111,145 +130,162 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import {ref, computed, onMounted} from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 
-const properties = ref([]) // 房源列表
-const showForm = ref(false) // 控制弹窗显示
-const editIndex = ref(null) // 当前编辑索引
+const properties = ref([])
+onMounted(async () => {
+  try {
+    const res = await fetch('/api/properties')  // 假设这里是获取房源列表的接口
+    if (!res.ok) throw new Error('获取房源失败')
+    const data = await res.json()
+    properties.value = data  // 赋值给响应式数组
+  } catch (error) {
+    ElMessage.error('加载房源数据失败')
+  }
+})
+const showForm = ref(false)
+const editIndex = ref(null)
 
 const form = ref({
-  address: '',
-  type: '',
+  house_num: '',
+  title: '',
+  region: '',
+  block: '',
+  community: '',
   area: null,
-  rent: null,
-  deposit: null,
+  direction: '',
+  rooms: '',
+  price: null,
+  rent_type: '',
   decoration: '',
-  status: '',      // 新增房源状态字段
-  photos: [],      // 房屋照片列表
-  videos: []       // 房屋视频列表
+  subway: 0,
+  available: 1,
+  tag_new: 0,
+  landlord: '',
+  phone_num: '',
+  photos: [],
+  videos: []
 })
 
-// 弹窗宽度响应式
 const dialogWidth = computed(() => {
   if (window.innerWidth > 1024) {
-    return '700px'
-  } else if (window.innerWidth > 768) {
     return '600px'
+  } else if (window.innerWidth > 768) {
+    return '500px'
   } else {
-    return '90%'
+    return '95%'
   }
 })
 
-// 打开表单
 function openForm(property = null, index = null) {
   if (property) {
-    form.value = {
-      address: property.address || '',
-      type: property.type || '',
-      area: property.area || null,
-      rent: property.rent || null,
-      deposit: property.deposit || null,
-      decoration: property.decoration || '',
-      status: property.status || '',
-      photos: property.photos ? [...property.photos] : [],
-      videos: property.videos ? [...property.videos] : []
-    }
+    // 复制其他字段
+    Object.assign(form.value, property)
+    // 把原有图片数组转换成上传组件能识别的格式
+    form.value.photos = (property.photos || []).map((url, i) => ({
+      name: `图片${i + 1}`,
+      url,
+      status: 'done',
+      uid: `edit-${i}-${Date.now()}`
+    }))
+    // 视频同理，如果用到视频上传也要转换
+    form.value.videos = (property.videos || []).map((url, i) => ({
+      name: `视频${i + 1}`,
+      url,
+      status: 'done',
+      uid: `edit-video-${i}-${Date.now()}`
+    }))
     editIndex.value = index
   } else {
-    form.value = {
-      address: '',
-      type: '',
+    Object.assign(form.value, {
+      house_num: '',
+      title: '',
+      region: '',
+      block: '',
+      community: '',
       area: null,
-      rent: null,
-      deposit: null,
+      direction: '',
+      rooms: '',
+      price: null,
+      rent_type: '',
       decoration: '',
-      status: '',
+      subway: 0,
+      available: 1,
+      tag_new: 0,
       photos: [],
-      videos: []
-    }
+      videos: [],
+      landlord: '',
+      phone_num: ''
+    })
     editIndex.value = null
   }
   showForm.value = true
 }
 
-// 保存房源（包含文件和所有字段）
+
+
+function closeForm() {
+  showForm.value = false
+}
+const formRef = ref(null)
+
 async function saveProperty() {
-  if (!form.value.address || !form.value.type) {
-    ElMessage.warning('请填写完整信息')
-    return
-  }
+  if (!formRef.value) return
 
   try {
-    // 构造FormData上传所有字段和文件
+    await formRef.value.validate()  // 校验失败会抛异常，直接跳转catch
+
+    // 构造formData
     const formData = new FormData()
-    formData.append('address', form.value.address)
-    formData.append('type', form.value.type)
-    formData.append('area', form.value.area ?? '')
-    formData.append('rent', form.value.rent ?? '')
-    formData.append('deposit', form.value.deposit ?? '')
-    formData.append('decoration', form.value.decoration)
-    formData.append('status', form.value.status)
-
-    // 上传照片文件
-    form.value.photos.forEach((fileItem, index) => {
-      if (fileItem.raw) {
-        formData.append('photos', fileItem.raw)
+    for (const key in form.value) {
+      if (key === 'photos' || key === 'videos') {
+        form.value[key].forEach(f => {
+          if (f.raw) formData.append(key + '[]', f.raw)
+        })
+      } else {
+        formData.append(key, form.value[key] ?? '')
       }
-    })
-
-    // 上传视频文件（最多一个）
-    form.value.videos.forEach((fileItem) => {
-      if (fileItem.raw) {
-        formData.append('videos', fileItem.raw)
-      }
-    })
-
-    // 这里用fetch做示范，替换成你的后端接口地址
-    const response = await fetch('/api/properties', {
-      method: editIndex.value !== null ? 'PUT' : 'POST',
-      body: formData
-    })
-
-    if (!response.ok) {
-      throw new Error('上传失败')
     }
 
-    const savedData = await response.json()
+    const url = editIndex.value !== null ? `/api/properties/${form.value.house_num || ''}` : '/api/properties'
+    const method = editIndex.value !== null ? 'PUT' : 'POST'
 
-    // 本地更新列表
+    const res = await fetch(url, { method, body: formData })
+    //if (!res.ok) {
+     // const errMsg = await res.text()
+     // throw new Error(`请求失败: ${errMsg}`)
+   // }
+
     if (editIndex.value !== null) {
-      properties.value[editIndex.value] = savedData
+      properties.value[editIndex.value] = { ...form.value }
       ElMessage.success('房源更新成功')
     } else {
-      properties.value.push(savedData)
+      properties.value.push({ ...form.value })
       ElMessage.success('房源添加成功')
     }
 
     closeForm()
-  } catch (error) {
-    ElMessage.error(error.message || '保存失败')
+  } catch (err) {
+    // 如果是校验失败，会是一个对象，err.errors数组里有详细信息，可以定制提示
+    if (err.errors && err.errors.length > 0) {
+      ElMessage.error(err.errors[0].message || '请填写所有必填项')
+    } else {
+      ElMessage.error(err.message || '请填写所有必填项或保存失败')
+    }
   }
 }
 
-// 关闭表单
-function closeForm() {
-  showForm.value = false
-}
-
-// 删除房源
 function deleteProperty(index) {
   ElMessageBox.confirm('确认删除该房源？', '提示', {
-    type: 'warning',
-    confirmButtonText: '确定',
-    cancelButtonText: '取消'
-  })
-    .then(() => {
-      properties.value.splice(index, 1)
-      ElMessage.success('删除成功')
-    })
-    .catch(() => {})
+    type: 'warning', confirmButtonText: '确定', cancelButtonText: '取消'
+  }).then(() => {
+    properties.value.splice(index, 1)
+    ElMessage.success('删除成功')
+  }).catch(() => {})
 }
-</script>
 
+
+
+</script>

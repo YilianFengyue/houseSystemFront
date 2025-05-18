@@ -1,26 +1,6 @@
 <template>
+  <News :newsList="newsData" />
   <div>
-    <!-- 顶部轮播 -->
-    <v-carousel height="400" show-arrows="hover" cycle hide-delimiter-background>
-      <v-carousel-item v-for="(slide, i) in slides" :key="i">
-        <v-sheet height="100%" class="d-flex flex-column justify-center align-center" style="position: relative;">
-          <div :style="{
-            backgroundImage: `url(${bgImages[i]})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            position: 'absolute',
-            top: 0, right: 0, bottom: 0, left: 0,
-            filter: 'brightness(0.6)',
-            zIndex: 0,
-          }"></div>
-
-          <div style="position: relative; z-index: 1; color: white; text-align: center; max-width: 600px;">
-            <div class="text-h4 font-weight-bold mb-2" style="text-shadow: 0 0 5px rgba(0,0,0,0.7);">{{ slide.title }}</div>
-            <div class="text-subtitle-1" style="text-shadow: 0 0 3px rgba(0,0,0,0.6);">{{ slide.description }}</div>
-          </div>
-        </v-sheet>
-      </v-carousel-item>
-    </v-carousel>
 
     <!-- 房东新闻管理 -->
     <div class="mt-8 px-4">
@@ -66,22 +46,30 @@
 </template>
 
 <script setup>
+
+import News from '../../components/houseDetail/News.vue'
+
+const newsData = [
+  {
+    title: "北京租赁市场回暖，空置率下降",
+    content: "北京市核心区域的住宅空置率同比下降了5%。随着政策利好，租赁市场持续回暖，租金稳中有升。",
+    bgImage: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    title: "上海二手房均价创新高",
+    content: "上海市区二手房均价突破5万元/平方米，市场竞争加剧。",
+    bgImage: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    title: "装修品质成选择关键",
+    content: "近七成租客更倾向于选择装修精良的房源，装修标准逐渐成为竞争力焦点。",
+    bgImage: "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=800&q=80"
+  }
+]
+
 import { ref } from "vue";
 import axios from "axios";
 
-const slides = [
-  { title: "北京租赁市场回暖，空置率下降", description: "北京市核心区域的住宅空置率同比下降了5%" },
-  { title: "上海二手房均价创新高", description: "上海市区二手房均价突破5万元/平方米" },
-  { title: "装修品质成选择关键", description: "近七成租客更倾向于选择装修精良的房源" },
-  { title: "新租赁法规助力市场规范", description: "新租赁法规强调保护租客权益" },
-];
-
-const bgImages = [
-  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
-  "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=80",
-  "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=800&q=80",
-  "https://images.unsplash.com/photo-1468071174046-657d9d351a40?auto=format&fit=crop&w=800&q=80",
-];
 
 // 新闻数据（前端维护）
 const landlordNews = ref([
