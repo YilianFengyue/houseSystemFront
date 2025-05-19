@@ -1,7 +1,5 @@
 <template>
-  <News :newsList="newsData" />
   <div>
-
     <!-- 房东新闻管理 -->
     <div class="mt-8 px-4">
       <div class="d-flex align-center justify-space-between mb-4">
@@ -16,6 +14,14 @@
         item-key="id"
         dense
       >
+        <!-- 内容截断展示 -->
+        <template #item.content="{ item }">
+          <span :title="item.content">
+            {{ item.content.length > 30 ? item.content.slice(0, 30) + '...' : item.content }}
+          </span>
+        </template>
+
+        <!-- 操作按钮 -->
         <template #item.actions="{ item, index }">
           <v-btn icon color="primary" @click="openEditDialog(item, index)" :title="'编辑 ' + item.title">
             <v-icon>mdi-pencil</v-icon>
@@ -46,32 +52,9 @@
 </template>
 
 <script setup>
-
-import News from '../../components/houseDetail/News.vue'
-
-const newsData = [
-  {
-    title: "北京租赁市场回暖，空置率下降",
-    content: "北京市核心区域的住宅空置率同比下降了5%。随着政策利好，租赁市场持续回暖，租金稳中有升。",
-    bgImage: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    title: "上海二手房均价创新高",
-    content: "上海市区二手房均价突破5万元/平方米，市场竞争加剧。",
-    bgImage: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    title: "装修品质成选择关键",
-    content: "近七成租客更倾向于选择装修精良的房源，装修标准逐渐成为竞争力焦点。",
-    bgImage: "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=800&q=80"
-  }
-]
-
 import { ref } from "vue";
-import axios from "axios";
 
-
-// 新闻数据（前端维护）
+// 模拟新闻数据（前端维护）
 const landlordNews = ref([
   { id: 1, title: "租赁新政策", content: "近期出台了新的租赁政策。" },
   { id: 2, title: "维修服务升级", content: "维修服务时间缩短至24小时内响应。" },
@@ -105,28 +88,32 @@ function closeEditDialog() {
 }
 
 // 保存新闻（新增 or 编辑）
-async function saveNews() {
-  const { title, content } = editForm.value;
-  if (!title || !content) return alert("请填写完整信息");
+function saveNews() {
+  const title = editForm.value.title.trim();
+  const content = editForm.value.content.trim();
+
+  if (!title || !content) {
+    alert("请填写完整信息");
+    return;
+  }
+
   closeEditDialog();
 
   if (editIndex.value !== null) {
+    // 编辑
     const id = landlordNews.value[editIndex.value].id;
     landlordNews.value[editIndex.value] = { id, title, content };
-    await axios.put(`/api/news/${id}`, { title, content });
   } else {
-    const newId = Date.now();
+    // 新增，ID 自动递增
+    const newId = Math.max(0, ...landlordNews.value.map(n => n.id)) + 1;
     landlordNews.value.push({ id: newId, title, content });
-    await axios.post("/api/news", { id: newId, title, content });
   }
-
 }
 
 // 删除新闻
-async function confirmDelete(item, index) {
+function confirmDelete(item, index) {
   if (confirm("确认删除该新闻吗？")) {
     landlordNews.value.splice(index, 1);
-    await axios.delete(`/api/news/${item.id}`);
   }
 }
 </script>
@@ -139,7 +126,22 @@ async function confirmDelete(item, index) {
   padding-left: 1rem;
   padding-right: 1rem;
 }
-.v-sheet > div {
-  user-select: none;
+.d-flex {
+  display: flex;
+}
+.align-center {
+  align-items: center;
+}
+.justify-space-between {
+  justify-content: space-between;
+}
+.mb-4 {
+  margin-bottom: 1rem;
+}
+.text-2xl {
+  font-size: 1.5rem;
+}
+.font-bold {
+  font-weight: bold;
 }
 </style>
