@@ -24,25 +24,22 @@ onMounted(() => {
         <BannerPage></BannerPage>
       </v-col>
     </v-row>
+     <v-row class="flex-0" dense>
+      <v-col cols="12" xl="4">
+       <CityCard></CityCard>
+      </v-col>
+    </v-row>
+     <v-row class="flex-0" dense>
+      <v-col cols="12" xl="4">
+        <SecondHandHouse></SecondHandHouse>
+      </v-col>
+    </v-row>
     <v-row class="flex-0" dense>
       <v-col cols="12" xl="4">
         <HouseCard></HouseCard>
       </v-col>
     </v-row>
-    <v-row class="flex-0" dense>
-      <v-col cols="12" xl="4">
-       <CityCard></CityCard>
-      </v-col>
-
-    </v-row>
    
-    <v-row class="flex-0" dense>
-      <v-col cols="12" xl="4">
-        <SecondHandHouse></SecondHandHouse>
-       
-      </v-col>
-
-    </v-row>
     <v-row class="flex-0" dense>
       <v-col cols="12" xl="4">
         <Footer1></Footer1>

@@ -39,7 +39,7 @@ export default defineConfig({
     port: 4399,
     proxy: {
       "/sdApi": {
-        target: "http://localhost:81",
+        target: "http://localhost:5000",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/sdApi/, ""),
       },
