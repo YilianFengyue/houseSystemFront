@@ -140,13 +140,13 @@ const onDateSelected = async (date: string | Date) => {
   //showDatePicker.value = false; / 选择后隐藏日期选择器
 
 try {
-    const response = await fetch('http://localhost:5000/api/appointment/appointments', {
+    const response = await fetch('http://localhost:5000/appointments', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        username: "aaaa"
+        username: "aaaa",
         time: date.toISOString(),
         property: "万科魅力之城武广新城" // 可以添加更多房产信息
       })

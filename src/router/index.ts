@@ -89,7 +89,7 @@ export const routes = [
 
   },
   {
-      path: "/new-page",
+      path: "/chat",
       meta: {
         requiresAuth: true,
         layout: "landing",

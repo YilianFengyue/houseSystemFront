@@ -214,7 +214,7 @@ const submitContract = async () => {
       currentDate: new Date().toISOString().split('T')[0]
     }
 
-    const response = await fetch('http://localhost:5000/api/contract/contracts', {
+    const response = await fetch('http://localhost:5000/contracts', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
