@@ -15,6 +15,11 @@ export default {
           icon: "mdi-view-dashboard-outline",
         },
         {
+          text: "搜索列表",
+          link: "/houseList",
+          icon: "mdi-format-list-bulleted",
+        },
+        {
           text: "商品类型",
           link: "/product",
           icon: "mdi-view-dashboard-outline",
