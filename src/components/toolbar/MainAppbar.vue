@@ -10,10 +10,18 @@ import { useDisplay } from "vuetify";
 import { useCustomizeThemeStore } from "@/stores/customizeTheme";
 import ToolbarNotifications from "./ToolbarNotifications.vue";
 import ToolbarUser from "./ToolbarUser.vue";
-
 //search
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+
+import { useFixCardStore } from '@/stores/fixCardStore'
+
+const fixCardStore = useFixCardStore()
+
+const toggleFixCard = () => {
+  fixCardStore.toggleFixCard()
+}
+
 const searchQuery = ref(''); // 定义搜索查询变量
 const router = useRouter(); // 使用 Vue Router
 
@@ -25,6 +33,9 @@ const searchProduct = () => {
 const { mdAndUp } = useDisplay();
 const customizeTheme = useCustomizeThemeStore();
 
+//fix-btn
+const variants = ['tonal']
+  const color = ref('indigo')
 </script>
 
 <template>
@@ -40,6 +51,7 @@ const customizeTheme = useCustomizeThemeStore();
       <!-- ---------------------------------------------- -->
       <!-- NavIcon -->
       <!-- ---------------------------------------------- -->
+
       <v-app-bar-nav-icon
         @click="customizeTheme.mainSidebar = !customizeTheme.mainSidebar"
       ></v-app-bar-nav-icon>
@@ -59,6 +71,14 @@ const customizeTheme = useCustomizeThemeStore();
         ></v-text-field>
       </div>
       <v-spacer></v-spacer>
+
+       <v-btn
+        class="ma-2"
+        color="grey"
+        icon="mdi-wrench"
+        @click="toggleFixCard"
+       ></v-btn>
+        <!--fix-btn above-->
       <ToolbarNotifications />
       <v-btn icon @click="customizeTheme.themeDrawer = !customizeTheme.themeDrawer">
         <v-icon>mdi-cart</v-icon>
@@ -69,6 +89,7 @@ const customizeTheme = useCustomizeThemeStore();
       </div>
     </div>
   </v-app-bar>
+
 </template>
 
 <style scoped lang="scss"></style>
