@@ -1,149 +1,3 @@
-<script setup lang="ts">
-import { useProfileStore } from "@/stores/profileStore";
-import { onMounted, ref } from 'vue';
-import { scrollToBottom } from "@/utils/common";
-import { useSnackbarStore } from "@/stores/snackbarStore";
-
-// ---------------------------
-// 默认用户已登录，固定为Andy
-// ---------------------------
-const currentUser = ref('Andy'); // 新增：默认登录用户
-const profileStore = useProfileStore();
-const snackbarStore = useSnackbarStore();
-
-interface Message {
-  message_id: string;
-  content: string;
-  sender_username: string;  // 固定为"Andy"或"LU"
-  receiver_username: string; // 固定为"LU"或"Andy"
-  timestamp: number;
-}
-
-// 用户输入消息
-const userMessage = ref("");
-// 消息列表
-const messages = ref<Message[]>([]);
-// 输入框行数
-const inputRow = ref(1);
-// 加载状态
-const isLoading = ref(false);
-// 连接状态
-const isConnected = ref(true);
-
-// ---------------------------
-// 修改：从后端API获取当前用户（Andy）的消息
-// ---------------------------
-const fetchMessagesFromAPI = async () => {
-  isLoading.value = true;
-  try {
-    // 直接使用currentUser获取消息，无需硬编码sender=Andy
-    const response = await fetch(`http://localhost:5000/comments/messages?sender=${currentUser.value}`);
-    if (!response.ok) {
-      throw new Error('获取消息失败');
-    }
-    const data = await response.json();
-    if (data.status === 'success') {
-      messages.value = data.data.messages;
-      scrollToBottom(document.querySelector(".message-container"));
-    }
-  } catch (error) {
-    console.error('获取消息错误:', error);
-    snackbarStore.showErrorMessage('获取历史消息失败');
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-// ---------------------------
-// 修改：发送消息时使用当前用户作为发送者
-// ---------------------------
-const sendMessageToAPI = async (message: Message) => {
-  try {
-    const response = await fetch('http://localhost:5000/comments/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        content: message.content,
-        sender_username: currentUser.value, // 使用当前用户
-        receiver_username: 'LU' // 接收者固定为LU
-      })
-    });
-    
-    if (!response.ok) {
-      throw new Error('发送消息失败');
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('API请求错误:', error);
-    throw error;
-  }
-};
-
-// 发送消息
-const sendMessage = async () => {
-  if (!userMessage.value.trim()) return;
-  
-  if (!isConnected.value) {
-    snackbarStore.showErrorMessage('连接已断开，请刷新页面重试');
-    return;
-  }
-
-  const newMessage: Message = {
-    message_id: Date.now().toString(),
-    content: userMessage.value,
-    sender_username: currentUser.value, // 使用当前用户
-    receiver_username: 'LU', // 固定接收者
-    timestamp: Date.now()
-  };
-
-  try {
-    // 发送到后端API
-    await sendMessageToAPI(newMessage);
-    
-    // 添加到本地消息列表
-    messages.value.push(newMessage);
-    userMessage.value = "";
-    scrollToBottom(document.querySelector(".message-container"));
-    
-    // 模拟对方回复
-    setTimeout(() => {
-      const replyMessage: Message = {
-        message_id: (Date.now() + 1).toString(),
-        content: `回复: ${newMessage.content}`,
-        sender_username: 'LU',
-        receiver_username: currentUser.value, // 回复给当前用户
-        timestamp: Date.now()
-      };
-      messages.value.push(replyMessage);
-      scrollToBottom(document.querySelector(".message-container"));
-    }, 1000);
-    
-  } catch (error) {
-    console.error('Error sending message:', error);
-    snackbarStore.showErrorMessage('消息发送失败');
-  }
-};
-
-// 键盘事件处理
-const handleKeydown = (e: KeyboardEvent) => {
-  if (e.key === "Enter" && (e.altKey || e.shiftKey)) {
-    e.preventDefault();
-    userMessage.value += "\n";
-  } else if (e.key === "Enter") {
-    e.preventDefault();
-    sendMessage();
-  }
-};
-
-onMounted(async () => {
-  // 从API加载当前用户（Andy）的消息
-  await fetchMessagesFromAPI();
-});
-</script>
-
 <template>
   <div class="chat-room">
     <div class="chat-container">
@@ -152,7 +6,7 @@ onMounted(async () => {
         <perfect-scrollbar v-if="messages.length > 0" class="message-container">
           <template v-for="message in messages" :key="message.message_id">
             <div class="pa-4" :class="{
-              'user-message': message.sender_username === currentUser, // 使用currentUser判断
+              'user-message': message.sender_username === currentUser,
               'other-message': message.sender_username !== currentUser
             }">
               <v-avatar class="ml-4" rounded="sm" variant="elevated">
@@ -180,13 +34,12 @@ onMounted(async () => {
         </perfect-scrollbar>
         <div class="no-message-container" v-else>
           <h1 class="text-h4 text-md-h2 text-primary font-weight-bold">
-            {{ currentUser }}与LU的聊天室 <!-- 显示当前用户名 -->
+            {{ currentUser }}与LU的聊天室
           </h1>
           <p class="text-grey">开始与LU交流吧</p>
         </div>
       </div>
     </div>
-    
     <!-- 输入区域 -->
     <div class="input-area">
       <v-sheet
@@ -230,6 +83,131 @@ onMounted(async () => {
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import { useProfileStore } from "@/stores/profileStore";
+import { onMounted, ref } from 'vue';
+import { scrollToBottom } from "@/utils/common";
+import { useSnackbarStore } from "@/stores/snackbarStore";
+import io from 'socket.io-client';
+
+// ---------------------------
+// 默认用户已登录，固定为Andy
+// ---------------------------
+const currentUser = ref('Andy');
+const profileStore = useProfileStore();
+const snackbarStore = useSnackbarStore();
+
+interface Message {
+  message_id: string;
+  content: string;
+  sender_username: string;
+  receiver_username: string;
+  timestamp: number;
+}
+
+// 用户输入消息
+const userMessage = ref("");
+// 消息列表
+const messages = ref<Message[]>([]);
+// 输入框行数
+const inputRow = ref(1);
+// 加载状态
+const isLoading = ref(false);
+// 连接状态
+const isConnected = ref(true);
+
+// 连接到服务器
+const socket = io('http://localhost:5000');
+
+// 监听新消息事件
+socket.on('new_message', (newMessage) => {
+  messages.value.push({
+    message_id: newMessage.message_id,
+    content: newMessage.content,
+    sender_username: newMessage.sender_username,
+    receiver_username: newMessage.receiver_username,
+    timestamp: new Date(newMessage.timestamp).getTime()
+  });
+  scrollToBottom(document.querySelector(".message-container"));
+});
+
+// 从后端API获取当前用户（Andy）和LU的消息
+const fetchMessagesFromAPI = async () => {
+  isLoading.value = true;
+  try {
+    const response = await fetch(`http://localhost:5000/comments/messages?user1=${currentUser.value}&user2=LU`);
+    if (!response.ok) {
+      throw new Error('获取消息失败');
+    }
+    const data = await response.json();
+    if (data.code === 200) {
+      messages.value = data.data.messages.map((msg) => ({
+        ...msg,
+        timestamp: new Date(msg.timestamp).getTime()
+      }));
+    }
+  } catch (error) {
+    console.error('获取消息错误:', error);
+    snackbarStore.showErrorMessage('获取历史消息失败');
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// 发送消息到服务器
+const sendMessageToServer = (message: Message) => {
+  socket.emit('send_message', {
+    sender_username: message.sender_username,
+    receiver_username: message.receiver_username,
+    content: message.content
+  });
+};
+
+// 发送消息
+const sendMessage = async () => {
+  if (!userMessage.value.trim()) return;
+  
+  if (!isConnected.value) {
+    snackbarStore.showErrorMessage('连接已断开，请刷新页面重试');
+    return;
+  }
+
+  const newMessage: Message = {
+    message_id: Date.now().toString(),
+    content: userMessage.value,
+    sender_username: currentUser.value,
+    receiver_username: 'LU',
+    timestamp: Date.now()
+  };
+
+  try {
+    // 发送到服务器
+    sendMessageToServer(newMessage);
+    userMessage.value = "";
+    scrollToBottom(document.querySelector(".message-container"));
+  } catch (error) {
+    console.error('Error sending message:', error);
+    snackbarStore.showErrorMessage('消息发送失败');
+  }
+};
+
+// 键盘事件处理
+const handleKeydown = (e: KeyboardEvent) => {
+  if (e.key === "Enter" && (e.altKey || e.shiftKey)) {
+    e.preventDefault();
+    userMessage.value += "\n";
+  } else if (e.key === "Enter") {
+    e.preventDefault();
+    sendMessage();
+  }
+};
+
+onMounted(async () => {
+  // 从API加载当前用户（Andy）和LU的消息
+  await fetchMessagesFromAPI();
+});
+</script>
 
 <style scoped lang="scss">
 .chat-room {

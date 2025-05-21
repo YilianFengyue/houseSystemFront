@@ -112,6 +112,22 @@ export const routes = [
       },
       component: () => import("@/views/pages/contractpage.vue"),
     },
+     {
+    path: "/landlord",
+    meta: {
+      requiresAuth: true,
+      layout: "landing",
+    },
+    component: () => import("@/views/pages/LandlordProperties.vue"),
+  },
+    {
+    path: "/news",
+    meta: {
+      requiresAuth: true,
+      layout: "landing",
+    },
+    component: () => import("@/views/pages/NewsPage.vue"),
+  },
 
 
   ...LandingRoutes,
