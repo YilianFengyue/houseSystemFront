@@ -22,7 +22,6 @@ import "vue3-lottie/dist/style.css";
 import Vue3Lottie from "vue3-lottie";
 import { autoAnimatePlugin } from '@formkit/auto-animate/vue'
 
-import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 
 const pinia = createPinia();
@@ -41,5 +40,5 @@ app.use(autoAnimatePlugin);
 app.use(vuetify);
 app.mount("#app");
 
-app.use(ElementPlus)
+
 

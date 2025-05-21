@@ -11,22 +11,38 @@
         :headers="headers"
         :items="landlordNews"
         class="elevation-1"
-        item-key="id"
+        item-key="news_id"
         dense
       >
-        <!-- 内容截断展示 -->
+        <template #item.news_id="{ item }">
+          {{ item.news_id }}
+        </template>
+
         <template #item.content="{ item }">
           <span :title="item.content">
-            {{ item.content.length > 30 ? item.content.slice(0, 30) + '...' : item.content }}
+            {{ item.content.length > 30 ? item.content.slice(0, 30) + "..." : item.content }}
           </span>
         </template>
 
-        <!-- 操作按钮 -->
+        <template #item.publishedAt="{ item }">
+          {{ formatDate(item.publishedAt) }}
+        </template>
+
         <template #item.actions="{ item, index }">
-          <v-btn icon color="primary" @click="openEditDialog(item, index)" :title="'编辑 ' + item.title">
+          <v-btn
+            icon
+            color="primary"
+            @click="openEditDialog(item, index)"
+            :title="'编辑 ' + item.title"
+          >
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
-          <v-btn icon color="red" @click="confirmDelete(item, index)" :title="'删除 ' + item.title">
+          <v-btn
+            icon
+            color="red"
+            @click="confirmDelete(item, index)"
+            :title="'删除 ' + item.title"
+          >
             <v-icon>mdi-delete</v-icon>
           </v-btn>
         </template>
@@ -40,6 +56,11 @@
         <v-card-text>
           <v-text-field v-model="editForm.title" label="标题" />
           <v-textarea v-model="editForm.content" label="内容" rows="4" />
+          <v-text-field
+            label="发布时间"
+            :value="formatDate(editForm.publishedAt)"
+            readonly
+          />
         </v-card-text>
         <v-card-actions>
           <v-spacer />
@@ -52,68 +73,135 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 
-// 模拟新闻数据（前端维护）
-const landlordNews = ref([
-  { id: 1, title: "租赁新政策", content: "近期出台了新的租赁政策。" },
-  { id: 2, title: "维修服务升级", content: "维修服务时间缩短至24小时内响应。" },
-]);
+const landlordNews = ref([]);
 
 const headers = [
+  { text: "新闻ID", value: "news_id", sortable: false },
   { text: "标题", value: "title", sortable: false },
   { text: "内容", value: "content", sortable: false },
+  { text: "发布时间", value: "publishedAt", sortable: false },
   { text: "操作", value: "actions", sortable: false, align: "center" },
 ];
 
 const showEditDialog = ref(false);
 const editIndex = ref(null);
-const editForm = ref({ title: "", content: "" });
+const editForm = ref({ news_id: null, title: "", content: "", publishedAt: "" });
 
-// 打开编辑弹窗
+async function fetchNews() {
+  try {
+    const res = await fetch("/news");
+    if (res.ok) {
+      landlordNews.value = await res.json();
+    } else {
+      alert("获取新闻失败");
+    }
+  } catch (e) {
+    alert("请求异常");
+    console.error(e);
+  }
+}
+
+onMounted(() => {
+  fetchNews();
+});
+
+// 获取当前日期yyyy-mm-dd格式
+function getCurrentDate() {
+  const d = new Date();
+  return d.toISOString().slice(0, 10);
+}
+
 function openEditDialog(item = null, index = null) {
   if (item) {
-    editForm.value = { ...item };
+    editForm.value = {
+      news_id: item.news_id,
+      title: item.title,
+      content: item.content,
+      publishedAt: item.publishedAt ? item.publishedAt.slice(0, 10) : getCurrentDate(),
+    };
     editIndex.value = index;
   } else {
-    editForm.value = { title: "", content: "" };
+    editForm.value = { news_id: null, title: "", content: "", publishedAt: getCurrentDate() };
     editIndex.value = null;
   }
   showEditDialog.value = true;
 }
 
-// 关闭弹窗
 function closeEditDialog() {
   showEditDialog.value = false;
 }
 
-// 保存新闻（新增 or 编辑）
-function saveNews() {
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  return dateStr.slice(0, 10);
+}
+
+async function saveNews() {
+  const news_id = editForm.value.news_id;
   const title = editForm.value.title.trim();
   const content = editForm.value.content.trim();
+  const publishedAt = editForm.value.publishedAt;
 
   if (!title || !content) {
     alert("请填写完整信息");
     return;
   }
 
-  closeEditDialog();
-
   if (editIndex.value !== null) {
-    // 编辑
-    const id = landlordNews.value[editIndex.value].id;
-    landlordNews.value[editIndex.value] = { id, title, content };
+    // 编辑，PUT请求
+    try {
+      const res = await fetch(`/news/${news_id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, content, publishedAt }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        landlordNews.value[editIndex.value] = updated;
+        closeEditDialog();
+      } else {
+        alert("更新失败");
+      }
+    } catch (e) {
+      alert("更新请求异常");
+      console.error(e);
+    }
   } else {
-    // 新增，ID 自动递增
-    const newId = Math.max(0, ...landlordNews.value.map(n => n.id)) + 1;
-    landlordNews.value.push({ id: newId, title, content });
+    // 新增，POST请求
+    try {
+      const res = await fetch("/news", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, content, publishedAt }),
+      });
+      if (res.ok) {
+        const created = await res.json();
+        landlordNews.value.push(created);
+        closeEditDialog();
+      } else {
+        alert("新增失败");
+      }
+    } catch (e) {
+      alert("新增请求异常");
+      console.error(e);
+    }
   }
 }
 
-// 删除新闻
-function confirmDelete(item, index) {
-  if (confirm("确认删除该新闻吗？")) {
-    landlordNews.value.splice(index, 1);
+async function confirmDelete(item, index) {
+  if (!confirm("确认删除该新闻吗？")) return;
+  try {
+    const res = await fetch(`/news/${item.news_id}`, { method: "DELETE" });
+    if (res.ok) {
+      landlordNews.value.splice(index, 1);
+    } else {
+      alert("删除失败");
+    }
+  } catch (e) {
+    alert("删除请求异常");
+    console.error(e);
   }
 }
 </script>

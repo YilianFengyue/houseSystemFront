@@ -406,7 +406,11 @@
 
 "@ctrl/tinycolor@^3.4.0", "@ctrl/tinycolor@^3.4.1":
   version "3.6.1"
+<<<<<<< Updated upstream
   resolved "https://registry.npmmirror.com/@ctrl/tinycolor/-/tinycolor-3.6.1.tgz"
+=======
+  resolved "https://registry.npmjs.org/@ctrl/tinycolor/-/tinycolor-3.6.1.tgz"
+>>>>>>> Stashed changes
   integrity sha512-SITSV6aIXsuVNV3f3O0f2n/cgyEDWoSqtZMYiAmcsYHydcKrOz3gUxB/iXd/Qf08+IZX4KpgNbvUdMBmWz+kcA==
 
 "@element-plus/icons-vue@^1.1.1":
@@ -416,7 +420,11 @@
 
 "@element-plus/icons-vue@^2.3.1":
   version "2.3.1"
+<<<<<<< Updated upstream
   resolved "https://registry.npmmirror.com/@element-plus/icons-vue/-/icons-vue-2.3.1.tgz"
+=======
+  resolved "https://registry.npmmirror.com/@element-plus/icons-vue/-/icons-vue-2.3.1.tgz#1f635ad5fdd5c85ed936481525570e82b5a8307a"
+>>>>>>> Stashed changes
   integrity sha512-XxVUZv48RZAd87ucGS48jPf6pKu0yV5UCg9f4FFwtrYxXOwWuVJo6wOvSLKEoMQKjv8GsX/mhP6UsC1lRwbUWg==
 
 "@esbuild/android-arm64@0.18.20":
@@ -908,14 +916,22 @@
 
 "@floating-ui/core@^1.7.0":
   version "1.7.0"
+<<<<<<< Updated upstream
   resolved "https://registry.npmmirror.com/@floating-ui/core/-/core-1.7.0.tgz"
+=======
+  resolved "https://registry.npmjs.org/@floating-ui/core/-/core-1.7.0.tgz"
+>>>>>>> Stashed changes
   integrity sha512-FRdBLykrPPA6P76GGGqlex/e7fbe0F1ykgxHYNXQsH/iTEtjMj/f9bpY5oQqbjt5VgZvgz/uKXbGuROijh3VLA==
   dependencies:
     "@floating-ui/utils" "^0.2.9"
 
 "@floating-ui/dom@^1.0.1":
   version "1.7.0"
+<<<<<<< Updated upstream
   resolved "https://registry.npmmirror.com/@floating-ui/dom/-/dom-1.7.0.tgz"
+=======
+  resolved "https://registry.npmjs.org/@floating-ui/dom/-/dom-1.7.0.tgz"
+>>>>>>> Stashed changes
   integrity sha512-lGTor4VlXcesUMh1cupTUTDoCxMb0V6bm3CnxHzQcw8Eaf1jQbgQX4i02fYgT0vJ82tb5MZ4CZk1LRGkktJCzg==
   dependencies:
     "@floating-ui/core" "^1.7.0"
@@ -923,7 +939,11 @@
 
 "@floating-ui/utils@^0.2.9":
   version "0.2.9"
+<<<<<<< Updated upstream
   resolved "https://registry.npmmirror.com/@floating-ui/utils/-/utils-0.2.9.tgz"
+=======
+  resolved "https://registry.npmjs.org/@floating-ui/utils/-/utils-0.2.9.tgz"
+>>>>>>> Stashed changes
   integrity sha512-MDWhGtE+eHw5JW7lq4qhc5yRLS11ERl1c7Z6Xd0a58DozHES6EnNNwUWbMiG4J9Cgj053Bhk8zvlhFYKVhULwg==
 
 "@formkit/auto-animate@^0.7.0":
@@ -1259,7 +1279,7 @@
   resolved "https://registry.npmjs.org/@polka/url/-/url-1.0.0-next.24.tgz"
   integrity sha512-2LuNTFBIO0m7kKIQvvPHN6UE63VjpmL9rnEEaOOaiSPbZK+zUOYIzBAWcED+3XYzhYsd/0mD57VdxAEqqV52CQ==
 
-"@popperjs/core@^2.11.3", "@popperjs/core@^2.9.0":
+"@popperjs/core@^2.11.3", "@popperjs/core@^2.9.0", "@popperjs/core@npm:@sxzz/popperjs-es@^2.11.7":
   version "2.11.8"
   resolved "https://registry.npmjs.org/@popperjs/core/-/core-2.11.8.tgz"
   integrity sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==
@@ -1562,15 +1582,25 @@
 
 "@types/lodash-es@^4.17.6":
   version "4.17.12"
+<<<<<<< Updated upstream
   resolved "https://registry.npmmirror.com/@types/lodash-es/-/lodash-es-4.17.12.tgz"
+=======
+  resolved "https://registry.npmjs.org/@types/lodash-es/-/lodash-es-4.17.12.tgz"
+>>>>>>> Stashed changes
   integrity sha512-0NgftHUcV4v34VhXm8QBSftKVXtbkBG3ViCjs6+eJ5a6y6Mi/jiFGPc1sC7QK+9BFhWrURE3EOggmWaSxL9OzQ==
   dependencies:
     "@types/lodash" "*"
 
 "@types/lodash@*", "@types/lodash@^4.14.182":
+<<<<<<< Updated upstream
   version "4.17.17"
   resolved "https://registry.npmmirror.com/@types/lodash/-/lodash-4.17.17.tgz"
   integrity sha512-RRVJ+J3J+WmyOTqnz3PiBLA501eKwXl2noseKOrNo/6+XEHjTAxO4xHvxQB6QuNm+s4WRbn6rSiap8+EA+ykFQ==
+=======
+  version "4.17.16"
+  resolved "https://registry.npmjs.org/@types/lodash/-/lodash-4.17.16.tgz"
+  integrity sha512-HX7Em5NYQAXKW+1T+FiuG27NGwzJfCX3s1GjOa7ujxZa52kjJLOr4FUxT+giF6Tgxv1e+/czV/iTtBw27WTU9g==
+>>>>>>> Stashed changes
 
 "@types/long@^4.0.1":
   version "4.0.2"
@@ -2012,7 +2042,11 @@ assertion-error@^1.1.0:
 
 async-validator@^4.0.7, async-validator@^4.2.5:
   version "4.2.5"
+<<<<<<< Updated upstream
   resolved "https://registry.npmmirror.com/async-validator/-/async-validator-4.2.5.tgz"
+=======
+  resolved "https://registry.npmjs.org/async-validator/-/async-validator-4.2.5.tgz"
+>>>>>>> Stashed changes
   integrity sha512-7HhHjtERjqlNbZtqNqy2rckN/SpOOlmDliet+lP7k+eKZEjPk3DgyeU9lIXLdeLz0uBbbVp+9Qdow9wJWgwwfg==
 
 asynckit@^0.4.0:
@@ -2471,10 +2505,17 @@ date-time@^3.1.0:
   dependencies:
     time-zone "^1.0.0"
 
+<<<<<<< Updated upstream
 dayjs@^1.10.8:
   version "1.11.10"
   resolved "https://registry.npmjs.org/dayjs/-/dayjs-1.11.10.tgz"
   integrity sha512-vjAczensTgRcqDERK0SR2XMwsF/tSvnvlv6VcF2GIhg6Sx4yOIt/irsr1RDJsKiIyBzJDpCoXiWWq28MqH2cnQ==
+=======
+dayjs@^1.10.8, dayjs@^1.11.13:
+  version "1.11.13"
+  resolved "https://registry.npmjs.org/dayjs/-/dayjs-1.11.13.tgz"
+  integrity sha512-oaMBel6gjolK862uaPQOVTA7q3TZhuSvuMQAAglQDOWYO9A91IrAOUJEyKVlqJlHE0vq5p5UXxzdPfMH/x6xNg==
+>>>>>>> Stashed changes
 
 dayjs@^1.11.13:
   version "1.11.13"
@@ -2674,7 +2715,11 @@ element-plus@2.1.4:
 
 element-plus@^2.9.10:
   version "2.9.10"
+<<<<<<< Updated upstream
   resolved "https://registry.npmmirror.com/element-plus/-/element-plus-2.9.10.tgz"
+=======
+  resolved "https://registry.npmjs.org/element-plus/-/element-plus-2.9.10.tgz"
+>>>>>>> Stashed changes
   integrity sha512-W2v9jWnm1kl/zm4bSvCh8aFCVlxvhG3fmqiDZwyd6WQiWGE595J/mpjcCggEr+49QDgIymhXrpPMOPPSARUbng==
   dependencies:
     "@ctrl/tinycolor" "^3.4.1"
@@ -3761,7 +3806,11 @@ normalize-url@^6.0.1:
 
 normalize-wheel-es@^1.1.1, normalize-wheel-es@^1.2.0:
   version "1.2.0"
+<<<<<<< Updated upstream
   resolved "https://registry.npmmirror.com/normalize-wheel-es/-/normalize-wheel-es-1.2.0.tgz"
+=======
+  resolved "https://registry.npmjs.org/normalize-wheel-es/-/normalize-wheel-es-1.2.0.tgz"
+>>>>>>> Stashed changes
   integrity sha512-Wj7+EJQ8mSuXr2iWfnujrimU35R2W4FAErEyTmJoJ7ucwTn2hOUSsRehMb5RSYkxXGTM7Y9QpvPmp++w5ftoJw==
 
 nth-check@^2.0.1:
