@@ -3,7 +3,8 @@
     <v-card-actions><v-card-title class="card-title text-h5">热门地区</v-card-title>
     <v-spacer></v-spacer>
     <v-btn 
-    color="primary">
+    color="primary"
+    @click="goHouseDetail()">
         <v-icon class="mr-2">mdi-more</v-icon>
         Learn More
     </v-btn>
@@ -61,6 +62,12 @@
 </template>
 
 <script setup lang="ts">
+//路由跳转
+import { useRouter } from 'vue-router'
+const router = useRouter()
+function goHouseDetail() {
+  router.push(`/house`)
+}
 const cards = [
   {
     flex: 6,

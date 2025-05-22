@@ -4,6 +4,17 @@
 * @Description:
 -->
 <script setup lang="ts">
+
+//路由跳转
+import { useRouter } from 'vue-router'
+const router = useRouter()
+function goHouseDetail() {
+  router.push(`/house`)
+}
+function goHouseDetail1(id: number) {
+  router.push(`/house/${id}`)
+}
+
 import { ref, onMounted } from "vue";
 import axios from "axios";
 const houses =ref<any[]>( [
@@ -34,6 +45,13 @@ onMounted(fetchHouces);
     <v-toolbar-title class="text-h6 font-weight-bold">
       <span>最新房源</span>
     </v-toolbar-title>
+     <v-spacer></v-spacer>
+    <v-btn 
+    color="primary"
+    @click="goHouseDetail()">
+        <v-icon class="mr-2">mdi-more</v-icon>
+        Learn More
+    </v-btn>
   </v-toolbar>
 
   <v-container fluid>
@@ -68,7 +86,7 @@ onMounted(fetchHouces);
               {{ item.landlord }}
             </v-btn>
             <v-spacer></v-spacer>
-            <v-btn color="primary" :href="item.href" target="_blank">
+            <v-btn color="primary" :href="item.href" target="_blank"  @click="goHouseDetail1(item.id)">
               查看详情
               <v-icon class="ml-2">mdi-chevron-right</v-icon>
             </v-btn>

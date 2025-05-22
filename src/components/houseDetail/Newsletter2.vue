@@ -9,7 +9,7 @@
   <v-toolbar height="60">
     <v-toolbar-title class="text-h6 font-weight-bold">
       <!-- <v-icon class="mr-2">mdi-account</v-icon> -->
-      <span>Newsletter2</span>
+      <span>联系我们</span>
     </v-toolbar-title>
   </v-toolbar>
 

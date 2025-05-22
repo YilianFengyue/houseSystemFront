@@ -4,6 +4,9 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import { useRoute } from "vue-router";
 import * as live2d from 'live2d-render';
+
+
+
 //购物车
 import { useCartStore } from '@/stores/cartStore';  // 导入 store
 const cartStore = useCartStore();  // 使用购物车 store

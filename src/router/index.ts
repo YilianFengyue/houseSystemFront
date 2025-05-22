@@ -34,7 +34,15 @@ export const routes = [
     component: () => import("@/views/pages/TestIndexPage.vue"),
   },
   {
-    path: "/product",
+    path: "/house",
+    meta: {
+      requiresAuth: true,
+      layout: "landing",
+    },
+    component: () => import("@/views/pages/ProcuctPage.vue"),
+  },
+  {
+    path: "/house/:id",
     meta: {
       requiresAuth: true,
       layout: "landing",

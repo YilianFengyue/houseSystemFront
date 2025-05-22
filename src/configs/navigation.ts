@@ -21,7 +21,7 @@ export default {
         },
         {
           text: "商品类型",
-          link: "/product",
+          link: "/house",
           icon: "mdi-view-dashboard-outline",
         },
         {

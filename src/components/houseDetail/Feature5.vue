@@ -7,7 +7,7 @@
 
 <template>
   <v-card class="my-5" rounded>
-    <v-card-title class="card-title">Feature5</v-card-title>
+    <v-card-title class="card-title">房屋详情</v-card-title>
     <v-divider></v-divider>
     <div class="pa-10">
       <v-card max-width="1600" class="mx-auto" variant="flat">
