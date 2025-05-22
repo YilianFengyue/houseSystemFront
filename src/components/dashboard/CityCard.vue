@@ -1,6 +1,6 @@
 <template>
   <v-card  class="my-5" rounded>
-    <v-card-actions><v-card-title class="card-title">热门城市</v-card-title>
+    <v-card-actions><v-card-title class="card-title text-h5">热门地区</v-card-title>
     <v-spacer></v-spacer>
     <v-btn 
     color="primary">
@@ -65,19 +65,19 @@ const cards = [
   {
     flex: 6,
     children: [
-      { title: '北京', src: 'https://s1.ljcdn.com/pegasus/pc/asset/main/img/beijing.jpg?_v=202505081523220', flex:8 ,el:"Beijing"},
-      { title: '徐州', src: 'https://s1.ljcdn.com/pegasus/pc/asset/main/img/xuzhou.jpg?_v=202505081523220', flex: 4 ,el:"Xuzhou"},
-      { title: '深圳', src: 'https://s1.ljcdn.com/pegasus/pc/asset/main/img/shenzhen.jpg?_v=202505081523220', flex: 4 ,el:"Shenzhen"},
-      { title: '成都', src: 'https://s1.ljcdn.com/pegasus/pc/asset/main/img/chengdu.jpg?_v=202505081523220', flex: 8 ,el:"Chengdu"},
+      { title: '岳麓区', src: 'https://s1.ljcdn.com/pegasus/pc/asset/main/img/beijing.jpg?_v=202505081523220', flex:8 ,el:"Beijing"},
+      { title: '开福区', src: 'https://s1.ljcdn.com/pegasus/pc/asset/main/img/xuzhou.jpg?_v=202505081523220', flex: 4 ,el:"Xuzhou"},
+      { title: '望城区', src: 'https://s1.ljcdn.com/pegasus/pc/asset/main/img/shenzhen.jpg?_v=202505081523220', flex: 4 ,el:"Shenzhen"},
+      { title: '天心区', src: 'https://s1.ljcdn.com/pegasus/pc/asset/main/img/chengdu.jpg?_v=202505081523220', flex: 8 ,el:"Chengdu"},
     ],
   },
-  { title: '上海', src: 'https://s1.ljcdn.com/pegasus/pc/asset/main/img/shanghai.jpg?_v=202505081523220', flex: 3 ,el:"Shanghai"},
+  { title: '雨花区', src: 'https://s1.ljcdn.com/pegasus/pc/asset/main/img/shanghai.jpg?_v=202505081523220', flex: 3 ,el:"Shanghai"},
 
   {
     flex: 3,
     children: [
-      { title: '广州', src: 'https://s1.ljcdn.com/pegasus/pc/asset/main/img/guangzhou.jpg?_v=202505081523220', flex: 12, el:"Guangzhou"},
-      { title: '郑州', src: 'https://s1.ljcdn.com/pegasus/pc/asset/main/img/zhengzhou.jpg?_v=202505081523220', flex: 12 ,el:"Zhengzhou"},
+      { title: '芙蓉区', src: 'https://s1.ljcdn.com/pegasus/pc/asset/main/img/guangzhou.jpg?_v=202505081523220', flex: 12, el:"Guangzhou"},
+      { title: '长沙县', src: 'https://s1.ljcdn.com/pegasus/pc/asset/main/img/zhengzhou.jpg?_v=202505081523220', flex: 12 ,el:"Zhengzhou"},
     ],
   },
 ];

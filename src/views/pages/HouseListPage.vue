@@ -185,10 +185,10 @@
                     <span>{{ house.decoration || '简装' }}</span> </div>
                 
                   <div class="mb-2">
-                    <v-chip v-if="house.subway === 1" color="blue-lighten-5" text-color="blue-darken-2" size="small" label class="mr-1 mb-1">近地铁</v-chip>
-                    <v-chip v-if="house.tag_new === 1" color="orange-lighten-5" text-color="orange-darken-2" size="small" label class="mr-1 mb-1">新上房源</v-chip>
-                    <v-chip v-if="house.available === 1" color="green-lighten-5" text-color="green-darken-2" size="small" label class="mr-1 mb-1">随时可看</v-chip>
-                    <v-chip color="cyan-lighten-5" text-color="cyan-darken-2" size="small" label class="mr-1 mb-1">{{ house.rent_type }}</v-chip>
+                    <v-chip v-if="house.subway === 1" color="blue" text-color="blue-darken-2" size="small" label class="mr-1 mb-1">近地铁</v-chip>
+                    <v-chip v-if="house.tag_new === 1" color="orange" text-color="orange-darken-2" size="small" label class="mr-1 mb-1">新上房源</v-chip>
+                    <v-chip v-if="house.available === 1" color="primary" text-color="green-darken-2" size="small" label class="mr-1 mb-1">随时可看</v-chip>
+                    <v-chip color="green" text-color="cyan-darken-2" size="small" label class="mr-1 mb-1">{{ house.rent_type }}</v-chip>
                   </div>
                 </div>
 

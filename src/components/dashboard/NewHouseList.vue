@@ -14,12 +14,13 @@ const houses =ref<any[]>( [
     image_url: "https://i.pinimg.com/736x/78/a9/6f/78a96f0de5b473b12bcd5be63f5891df.jpg",
     title: "整租·润和湘江天地 1室1厅 南",
     community: "润和湘江天地",
-    price: "1500"
+    price: "1500",
+    publish_time: "2025-05-19",
   },
 ]);
 const fetchHouces = async () => {
   try {
-    const response = await axios.get("/sdApi/houseinfo/hotLists");
+    const response = await axios.get("/sdApi/houseinfo/newLists");
     houses.value = response.data.data; // 假设返回的是数组
   } catch (error) {
     console.error("获取数据失败:", error);
@@ -31,7 +32,7 @@ onMounted(fetchHouces);
 <template>
   <v-toolbar class="mt-5" rounded="lg">
     <v-toolbar-title class="text-h6 font-weight-bold">
-      <span>热门房源</span>
+      <span>最新房源</span>
     </v-toolbar-title>
   </v-toolbar>
 
@@ -58,7 +59,7 @@ onMounted(fetchHouces);
           <v-card-text class=" d-flex text-red font-weight-bold justify-space-between">
                 总价：{{ item.price }}
                 <v-chip color="green">
-                  {{ item.page_views }} 浏览
+                  {{ item.publish_time }} 
                 </v-chip>
           </v-card-text>
           <v-card-actions>
