@@ -11,21 +11,21 @@
         :headers="headers"
         :items="landlordNews"
         class="elevation-1"
-        item-key="news_id"
+        item-key="id"
         dense
       >
-        <template #item.news_id="{ item }">
-          {{ item.news_id }}
+        <template #item.id="{ item }">
+          {{ item.id }}
         </template>
 
         <template #item.content="{ item }">
           <span :title="item.content">
-            {{ item.content.length > 30 ? item.content.slice(0, 30) + "..." : item.content }}
+            {{ item.content.length > 50 ? item.content.substring(0, 50) + '...' : item.content }}
           </span>
         </template>
 
-        <template #item.publishedAt="{ item }">
-          {{ formatDate(item.publishedAt) }}
+        <template #item.publish_time="{ item }">
+          {{ formatDate(item.publish_time) }}
         </template>
 
         <template #item.actions="{ item, index }">
@@ -58,7 +58,7 @@
           <v-textarea v-model="editForm.content" label="内容" rows="4" />
           <v-text-field
             label="发布时间"
-            :value="formatDate(editForm.publishedAt)"
+            :value="formatDate(editForm.publish_time)"
             readonly
           />
         </v-card-text>
@@ -78,28 +78,30 @@ import { ref, onMounted } from "vue";
 const landlordNews = ref([]);
 
 const headers = [
-  { text: "新闻ID", value: "news_id", sortable: false },
-  { text: "标题", value: "title", sortable: false },
-  { text: "内容", value: "content", sortable: false },
-  { text: "发布时间", value: "publishedAt", sortable: false },
-  { text: "操作", value: "actions", sortable: false, align: "center" },
+  { key: "id", title: "新闻ID", sortable: false },
+  { key: "title", title: "标题", sortable: false },
+  { key: "content", title: "内容", sortable: false },
+  { key: "publish_time", title: "发布时间", sortable: false },
+  { key: "actions", title: "操作", sortable: false, align: "center" },
 ];
 
 const showEditDialog = ref(false);
 const editIndex = ref(null);
-const editForm = ref({ news_id: null, title: "", content: "", publishedAt: "" });
+const editForm = ref({ id: null, title: "", content: "", publish_time: "" });
 
 async function fetchNews() {
   try {
-    const res = await fetch("/news");
+    const res = await fetch('http://localhost:5000/news');
     if (res.ok) {
-      landlordNews.value = await res.json();
+      const data = await res.json();
+      landlordNews.value = Array.isArray(data.data.items) ? data.data.items : [];
+      console.log('新闻列表加载成功', landlordNews.value);
     } else {
-      alert("获取新闻失败");
+      alert("获取新闻失败: " + res.statusText);
     }
   } catch (e) {
     alert("请求异常");
-    console.error(e);
+    console.error('获取新闻失败:', e);
   }
 }
 
@@ -115,15 +117,16 @@ function getCurrentDate() {
 
 function openEditDialog(item = null, index = null) {
   if (item) {
+    console.log('编辑新闻项:', item);
     editForm.value = {
-      news_id: item.news_id,
+      id: item.id,
       title: item.title,
       content: item.content,
-      publishedAt: item.publishedAt ? item.publishedAt.slice(0, 10) : getCurrentDate(),
+      publish_time: item.publish_time ? item.publish_time.slice(0, 10) : getCurrentDate(),
     };
     editIndex.value = index;
   } else {
-    editForm.value = { news_id: null, title: "", content: "", publishedAt: getCurrentDate() };
+    editForm.value = { id: null, title: "", content: "", publish_time: getCurrentDate() };
     editIndex.value = null;
   }
   showEditDialog.value = true;
@@ -139,65 +142,92 @@ function formatDate(dateStr) {
 }
 
 async function saveNews() {
-  const news_id = editForm.value.news_id;
+  const id = editForm.value.id;
   const title = editForm.value.title.trim();
   const content = editForm.value.content.trim();
-  const publishedAt = editForm.value.publishedAt;
+  const publish_time = editForm.value.publish_time;
 
   if (!title || !content) {
     alert("请填写完整信息");
     return;
   }
 
-  if (editIndex.value !== null) {
-    // 编辑，PUT请求
-    try {
-      const res = await fetch(`/news/${news_id}`, {
+  try {
+    let res, responseData;
+    
+    if (editIndex.value !== null) {
+      // 编辑，PUT请求
+      res = await fetch(`http://localhost:5000/news/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, content, publishedAt }),
+        body: JSON.stringify({ title, content, publish_time }),
       });
+      
       if (res.ok) {
-        const updated = await res.json();
-        landlordNews.value[editIndex.value] = updated;
+        responseData = await res.json();
+        console.log('更新成功，服务器返回:', responseData);
+        
+        // 找到列表中对应的项并更新
+        const itemIndex = landlordNews.value.findIndex(item => item.id === id);
+        if (itemIndex !== -1) {
+          // 使用服务器返回的数据更新现有项
+          // 注意：假设服务器返回完整的新闻对象
+          landlordNews.value[itemIndex] = {
+            ...landlordNews.value[itemIndex],  // 保留现有属性
+            ...responseData.data || responseData  // 合并服务器返回的数据
+          };
+          
+          // 强制更新引用以确保响应式更新
+          landlordNews.value = [...landlordNews.value];
+          console.log('更新后的新闻列表:', landlordNews.value);
+        } else {
+          console.error('找不到要更新的新闻项，ID:', id);
+          alert('更新失败：找不到新闻项');
+        }
+        
         closeEditDialog();
       } else {
-        alert("更新失败");
+        alert("更新失败: " + res.statusText);
       }
-    } catch (e) {
-      alert("更新请求异常");
-      console.error(e);
-    }
-  } else {
-    // 新增，POST请求
-    try {
-      const res = await fetch("/news", {
+    } else {
+      // 新增，POST请求
+      res = await fetch('http://localhost:5000/news', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, content, publishedAt }),
+        body: JSON.stringify({ title, content, publish_time }),
       });
+      
       if (res.ok) {
-        const created = await res.json();
-        landlordNews.value.push(created);
+        responseData = await res.json();
+        console.log('新增成功，服务器返回:', responseData);
+        
+        // 将新新闻添加到数组开头而不是末尾
+        const newNews = responseData.data || responseData;
+        landlordNews.value.unshift(newNews);
+        
+        // 强制更新引用以确保响应式更新
+        landlordNews.value = [...landlordNews.value];
+        console.log('新增后的新闻列表:', landlordNews.value);
+        
         closeEditDialog();
       } else {
-        alert("新增失败");
+        alert("新增失败: " + res.statusText);
       }
-    } catch (e) {
-      alert("新增请求异常");
-      console.error(e);
     }
+  } catch (e) {
+    alert("请求异常");
+    console.error(e);
   }
 }
 
 async function confirmDelete(item, index) {
   if (!confirm("确认删除该新闻吗？")) return;
   try {
-    const res = await fetch(`/news/${item.news_id}`, { method: "DELETE" });
+    const res = await fetch(`http://localhost:5000/news/${item.id}`, { method: "DELETE" });
     if (res.ok) {
       landlordNews.value.splice(index, 1);
     } else {
-      alert("删除失败");
+      alert("删除失败: " + res.statusText);
     }
   } catch (e) {
     alert("删除请求异常");
