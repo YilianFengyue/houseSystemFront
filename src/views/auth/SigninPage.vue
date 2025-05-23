@@ -10,8 +10,9 @@ const isSignInDisabled = ref(false);
 
 const refLoginForm = ref();
 const username = ref("ylfmoonn");
+const phone =ref("19511053624")
 const email = ref("vuetify3-visitor@gmail.com");
-const password = ref("sfm12345");
+const password = ref("123456");
 const isFormValid = ref(true);
 
 // show password field
@@ -24,7 +25,7 @@ const handleLogin = async () => {
     isSignInDisabled.value = true;
 
     try {
-      await authStore.loginWithUsernameAndPassword(username.value, password.value);
+      await authStore.loginWithUsernameAndPassword(phone.value, password.value);
     } catch (err) {
       console.error("登录出错", err);
     }
@@ -48,7 +49,7 @@ const emailRules = ref([
   (v: string) => /.+@.+\..+/.test(v) || "E-mail must be valid",
 ]);
 const usernameRules = ref([
-  (v: string) => !!v || "Username is required",
+  (v: string) => !!v || "Phone is required",
 ]);
 const passwordRules = ref([
   (v: string) => !!v || "Password is required",
@@ -88,17 +89,17 @@ const signInWithFacebook = () => {
       >
       <v-text-field
         ref="refUsername"
-        v-model="username"
+        v-model="phone"
         required
         :error="error"
-        :label="$t('Username')"
-        placeholder="输入用户名"
+        :label="$t('Phone')"
+        placeholder="输入手机号"
         density="default"
         variant="underlined"
         color="primary"
         bg-color="#fff"
         :rules="usernameRules"
-        name="username"
+        name="Phone"
         outlined
         validateOn="blur"
         @keyup.enter="handleLogin"

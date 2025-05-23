@@ -4,7 +4,7 @@ import { useAuthStore } from "@/stores/authStore";
 
 const authStore = useAuthStore();
 const username = ref("");
-
+const phone = ref("19511053623");
 // sign in buttons
 const isLoading = ref(false);
 const isSignInDisabled = ref(false);
@@ -23,7 +23,7 @@ const handleRegister = async () => {
   if (valid) {
     isLoading.value = true;
     isSignInDisabled.value = true;
-    authStore.registerWithUsernameAndPassword(username.value, password.value);
+    authStore.registerWithUsernameAndPassword(phone.value, password.value);
   } else {
     console.log("no");
   }
@@ -35,7 +35,7 @@ const emailRules = ref([
   (v: string) => /.+@.+\..+/.test(v) || "E-mail must be valid",
 ]);
 
-const usernameRules = ref([(v: string) => !!v || "UserNmae is required"]);
+const usernameRules = ref([(v: string) => !!v || "Phone is required"]);
 
 const passwordRules = ref([
   (v: string) => !!v || "Password is required",
@@ -71,10 +71,10 @@ const resetErrors = () => {
         lazy-validation
       >
         <v-text-field
-          v-model="username"
+          v-model="phone"
           required
           :error="error"
-          :label="$t('register.username')"
+          :label="$t('手机号')"
           density="default"
           variant="underlined"
           color="primary"

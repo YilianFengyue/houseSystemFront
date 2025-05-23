@@ -21,7 +21,7 @@ import i18n from "./plugins/i18n";
 import "vue3-lottie/dist/style.css";
 import Vue3Lottie from "vue3-lottie";
 import { autoAnimatePlugin } from '@formkit/auto-animate/vue'
-
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate' // 引入插件
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 
@@ -40,6 +40,6 @@ app.use(Vue3Lottie, { name: "LottieAnimation" });
 app.use(autoAnimatePlugin);
 app.use(vuetify);
 app.mount("#app");
-
+pinia.use(piniaPluginPersistedstate) 
 app.use(ElementPlus)
 

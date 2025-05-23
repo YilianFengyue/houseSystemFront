@@ -7,10 +7,14 @@
 <script setup lang="ts">
 import { useProfileStore } from "@/stores/profileStore";
 import { Icon } from "@iconify/vue";
+
+
 const profileStore = useProfileStore();
 //相关信息
 const newpassword = ref("");
 const confirmPassword = ref("");
+// 使用 storeToRefs 包裹 store 实例，然后再解构
+const user = reactive({ ...profileStore.user});
 const account = reactive({ ...profileStore.account });
 const signon = reactive({ ...profileStore.signon });
 const authorized = reactive({
@@ -34,7 +38,8 @@ const newPasswordShow = ref(false);
 const confirmPasswordShow = ref(false);
 
 onMounted(() => {
-  
+  console.log("user", user);
+  console.log("userStore", profileStore.user.addr);
 });
 </script>
 
@@ -46,12 +51,12 @@ Basic with Icons
         <v-card>
           <div class="d-flex flex-column pa-10">
             <v-avatar size="120" class="mx-auto elevation-12" color="white">
-              <v-img :src="signon.avatarUrl"> </v-img>
+              <v-img :src="user.avatarUrl"> </v-img>
             </v-avatar>
 
             <div class="text-center mt-5">
               <h3 class="text-h6 font-weight-bold">
-                {{signon.username}}
+                {{user.name}}
                 <v-chip size="small" class="font-weight-bold" color="blue">
                   User
                 </v-chip>
@@ -68,13 +73,13 @@ Basic with Icons
           <v-divider></v-divider>
           <div class="py-5 px-10">
             <v-icon color="grey"> mdi-email-check-outline </v-icon>
-            <span class="ml-4">{{ account.email }}</span>
+            <span class="ml-4">{{user.email }}</span>
           </div>
           <v-divider></v-divider>
 
           <div class="py-5 px-10">
             <v-icon color="grey"> mdi-phone-outline </v-icon>
-            <span class="ml-4">{{account.phone}}</span>
+            <span class="ml-4">{{user.phone}}</span>
           </div>
         </v-card>
       </v-col>
@@ -92,7 +97,7 @@ Basic with Icons
               <v-col cols="12" sm="6">
                 <v-label class="font-weight-medium mb-2">Username</v-label>
                 <v-text-field
-                  v-model="account.userid"
+                  v-model="user.name"
                   color="primary"
                   variant="outlined"
                   density="compact"
@@ -102,9 +107,9 @@ Basic with Icons
                 />
               </v-col>
               <v-col cols="12" sm="">
-                <v-label class="font-weight-medium mb-2">Firstname</v-label>
+                <v-label class="font-weight-medium mb-2">地区</v-label>
                 <v-text-field
-                  v-model="account.firstname"
+                  v-model="user.addr"
                   color="primary"
                   variant="outlined"
                   density="compact"
@@ -114,9 +119,9 @@ Basic with Icons
                 />
               </v-col>
               <v-col cols="12" sm="3">
-                <v-label class="font-weight-medium mb-2">Lastname</v-label>
+                <v-label class="font-weight-medium mb-2">身份证号</v-label>
                 <v-text-field
-                  v-model="account.lastname"
+                  v-model="user.identityCard"
                   color="primary"
                   variant="outlined"
                   density="compact"
@@ -129,7 +134,7 @@ Basic with Icons
                 <v-label class="font-weight-medium mb-2">Email</v-label>
                 <v-text-field
                   class="bg-blue-grey-lighten-5"
-                  v-model="account.email"
+                  v-model="user.email"
                   color="primary"
                   variant="outlined"
                   density="compact"

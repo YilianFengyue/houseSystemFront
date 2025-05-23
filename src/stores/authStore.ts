@@ -41,14 +41,14 @@ export const useAuthStore = defineStore("auth", {
     },
     //注册方法
 
-    async registerWithUsernameAndPassword(username: string, password: string) {
+    async registerWithUsernameAndPassword(phone: string, password: string) {
       try {
 
         const response = await axios.post(
           //跨域仍存在问题
-          "/sdApi/account/register",
+          "http://localhost:5000/user/register",
           new URLSearchParams({
-            username,
+            phone,
             password,
           }),
           {
@@ -57,7 +57,7 @@ export const useAuthStore = defineStore("auth", {
             },
           }
         );
-        if (response.data.code === 20011) {
+        if (response.data.code === 201) {
           // 注册成功后，直接跳转到登录页面
 
           router.push("/auth/signin");
@@ -72,12 +72,12 @@ export const useAuthStore = defineStore("auth", {
       router.push("/");
     },
     //登录方法
-    async loginWithUsernameAndPassword(username: string, password: string) {
+    async loginWithUsernameAndPassword(phone: string, password: string) {
       try {
         const response = await axios.post(
-          "/sdApi/account/login",
+          "http://localhost:5000/user/login",
           new URLSearchParams({
-            username,
+            phone,
             password,
           }),
           {
@@ -87,7 +87,7 @@ export const useAuthStore = defineStore("auth", {
           }
         );
 
-        if (response.data.code === 20011) {
+        if (response.data.code === 201) {
           this.setLoggedIn(true);
           this.user = response.data.data;
           //存储token到pinia
@@ -99,27 +99,25 @@ export const useAuthStore = defineStore("auth", {
                 // 2. 设置 token 到全局 axios headers
             // axios.defaults.headers.common["Authorization"] = response.data.token;
             console.log("完整登录响应数据：", response.data);
-            console.log("拼接出的 Authorization:", `Bearer ${response.data.msg}`);
-            // 3. 获取用户信息 /userInfo（你后端写好的合并接口）
-            // const profileRes = await axios.get("http://localhost:81/account/userInfo");
-            // const profileRes = await axios.get("http://localhost:81/account/userInfo", {
-            //   headers: {
-            //     Authorization: `${response.data.token}`,
-            //   },
-            // });
-            const profileRes = await axios.get("/sdApi/account/userInfo", {
+            console.log("拼接出的 Authorization:", `Bearer ${response.data.data.token}`);
+           
+            const profileRes = await axios.get("http://localhost:5000/user/userinfo", {
               headers: {
-                Authorization: `${response.data.msg}`,
+                Authorization: `${response.data.data.token}`,
               },
             });
-            if (profileRes.data.code === 20041) {
+            if (profileRes.data.code === 200) {
               const ProfileStore = useProfileStore();
               console.log(profileRes.data.data)
-              ProfileStore.setProfileFromVO(profileRes.data.data)
+              // ProfileStore.setProfileFromVO(profileRes.data.data)
+              ProfileStore.setUser(profileRes.data.data);
+               // 输出 store 中的 user 结构，验证是否设置成功
+              console.log("更新后 Pinia 中的 user 信息:", ProfileStore.user);
+           
             } else {
               console.error("获取用户信息失败：", profileRes.data.message);
             }
-          router.push("/");
+          // router.push("/");
         } else {
           const snackbarStore = useSnackbarStore();
           snackbarStore.showErrorMessage("密码错误！");
