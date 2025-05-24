@@ -4,6 +4,7 @@
       <router-view> </router-view>
     </component>
     
+    <RepaireCard />
     <CustomizationMenu />
     <BackToTop />
     <Snackbar />
@@ -24,6 +25,7 @@ import BackToTop from "@/components/common/BackToTop.vue";
 import Snackbar from "@/components/common/Snackbar.vue";
 // live2d
 import Live2d from "@/components/Live2d.vue";
+import RepaireCard from "./components/RepaireCard.vue";
 const customizeTheme = useCustomizeThemeStore();
 const route = useRoute();
 
@@ -50,4 +52,14 @@ const currentLayout = computed(() => {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+.global-fix-card {
+  position: fixed;
+  top: 70px; /* 位于 AppBar 下方 */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 400px;
+  z-index: 1000; /* 确保在最上层 */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+</style>

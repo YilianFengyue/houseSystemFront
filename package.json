@@ -39,6 +39,7 @@
     "pinia-plugin-persistedstate": "^4.3.0",
     "plantuml-encoder": "^1.4.0",
     "roboto-fontface": "*",
+    "socket.io-client": "^4.8.1",
     "unsplash-js": "^7.0.15",
     "vue": "^3.3.0",
     "vue-echarts": "^6.5.4",

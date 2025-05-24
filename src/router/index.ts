@@ -127,7 +127,30 @@ export const routes = [
       title: "LottieAnimation",
     },
 
-  },
+  },{
+      path: "/chat",
+      meta: {
+        requiresAuth: true,
+        layout: "landing",
+      },
+      component: () => import("@/views/pages/chatpage.vue"),
+    },
+    {
+      path: "/payPay",
+      meta: {
+        requiresAuth: true,
+        layout: "landing",
+      },
+      component: () => import("@/views/pages/PricingPage.vue"),
+    },
+    {
+      path: "/contract",
+      meta: {
+        requiresAuth: true,
+        layout: "landing",
+      },
+      component: () => import("@/views/pages/contractpage.vue"),
+    },
 
   ...LandingRoutes,
   ...AuthRoutes,

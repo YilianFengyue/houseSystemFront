@@ -117,7 +117,7 @@ export const useAuthStore = defineStore("auth", {
             } else {
               console.error("获取用户信息失败：", profileRes.data.message);
             }
-          // router.push("/");
+           router.push("/dashboard");
         } else {
           const snackbarStore = useSnackbarStore();
           snackbarStore.showErrorMessage("密码错误！");

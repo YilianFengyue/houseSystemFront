@@ -137,10 +137,10 @@ import { Plus } from '@element-plus/icons-vue'
 const properties = ref([])
 onMounted(async () => {
   try {
-    const res = await fetch('/api/properties')  // 假设这里是获取房源列表的接口
+    const res = await fetch('http://localhost:5000/houseinfo')  // 假设这里是获取房源列表的接口
     if (!res.ok) throw new Error('获取房源失败')
     const data = await res.json()
-    properties.value = data  // 赋值给响应式数组
+    properties.value = Array.isArray(data.data.items) ? data.data.items : []  // 赋值给响应式数组
   } catch (error) {
     ElMessage.error('加载房源数据失败')
   }
@@ -249,7 +249,7 @@ async function saveProperty() {
       }
     }
 
-    const url = editIndex.value !== null ? `/api/properties/${form.value.house_num || ''}` : '/api/properties'
+    const url = editIndex.value !== null ? `http://localhost:5000/houseinfo/${form.value.house_num || ''}` : 'http://localhost:5000/houseinfo'
     const method = editIndex.value !== null ? 'PUT' : 'POST'
 
     const res = await fetch(url, { method, body: formData })

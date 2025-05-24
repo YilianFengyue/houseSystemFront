@@ -14,6 +14,15 @@ import ToolbarUser from "./ToolbarUser.vue";
 //search
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useFixCardStore } from '@/stores/fixCardStore' // 新增：引入fixCardStore
+
+const fixCardStore = useFixCardStore() // 新增：创建fixCardStore实例
+
+// 新增：toggleFixCard函数，用于切换固定卡片状态
+const toggleFixCard = () => {
+  fixCardStore.toggleFixCard()
+}
+
 const searchQuery = ref(''); // 定义搜索查询变量
 const router = useRouter(); // 使用 Vue Router
 
@@ -24,6 +33,10 @@ const searchProduct = () => {
 };
 const { mdAndUp } = useDisplay();
 const customizeTheme = useCustomizeThemeStore();
+
+// 新增：fix-btn相关状态（如果需要）
+const variants = ['tonal']
+const color = ref('indigo')
 
 </script>
 
@@ -59,6 +72,15 @@ const customizeTheme = useCustomizeThemeStore();
         ></v-text-field>
       </div>
       <v-spacer></v-spacer>
+
+      <!-- 新增：扳手按钮 -->
+      <v-btn
+        class="ma-2"
+        color="grey"
+        icon="mdi-wrench"
+        @click="toggleFixCard"
+      ></v-btn>
+
       <ToolbarNotifications />
       <v-btn icon @click="customizeTheme.themeDrawer = !customizeTheme.themeDrawer">
         <v-icon>mdi-cart</v-icon>

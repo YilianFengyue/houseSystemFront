@@ -55,7 +55,7 @@ const house =ref(
 );
 const fetchHouce = async () => {
   try {
-    const response = await axios.get(`http://localhost:5000/houseinfo/${id}`);
+    const response = await axios.get(`http://localhost:5000/houseinfo/${house.value.id}`);
     house.value = response.data.data; // 假设返回的是数组
   } catch (error) {
     console.error("获取数据失败:", error);
@@ -63,7 +63,7 @@ const fetchHouce = async () => {
 };
 const fetchHouseDetail = async () => {
   try {
-    const response = await axios.get(`http://localhost:5000/housedetail/${id}`);
+    const response = await axios.get(`http://localhost:5000/housedetail/${house.value.id}`);
     detail.value = response.data.data; // 假设返回的是数组
   } catch (error) {
     console.error("获取数据失败:", error);

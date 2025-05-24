@@ -1,54 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-defineProps<{
-  house: any,
-  detail: any
-}>()
-// const house =ref( 
-  
-//   {
-//         area: 73.0,
-//         available: 1,
-//         block: "树木岭",
-//         community: "锦源小区",
-//         decoration: "精装",
-//         direction: "南",
-//         house_num: "10001",
-//         id: 1,
-//         image_url: "https://i.pinimg.com/736x/c4/3a/90/c43a90fcf336e05d7f849b527f067464.jpg",
-//         landlord: "张先生",
-//         page_views: "108次浏览",
-//         phone_num: "13800001234",
-//         price: 1600,
-//         publish_time: "2025-05-15",
-//         region: "雨花",
-//         rent_type: "整租",
-//         rooms: "2室1厅1卫",
-//         subway: 1,
-//         tag_new: 1,
-//         title: "整租·锦源小区 2室1厅 南"
-//   },
-// );
+// 定义props
+const props = defineProps<{
+  house: any;
+  detail: any;
+}>();
 
-// const detail=ref( 
-//   {
-//         created_at: "2025-05-22T21:32:16",
-//         detail_id: 1,
-//         facilities: {
-//             tv: true,
-//             washer: true,
-//             wifi: true
-//         },
-//         house_info_id: 1,
-//         map_coordinates: 222,
-//         photos: [
-//             "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
-//             "https://images.unsplash.com/photo-1494526585095-c41746248156",
-//             "https://images.unsplash.com/photo-1470770841072-f978cf4d019e"
-//         ],
-//         updated_at: "2025-05-22T21:34:28"
-//   },
-// );
 const form = ref({
   house_num: '',
   title: '整租·锦源小区 2室1厅 南',
@@ -76,12 +33,66 @@ const form = ref({
 
 const currentSlide = ref(0);
 
+const mediaList = computed(() => {
+  return form.value.videos.length > 0 ? form.value.videos : form.value.photos;
+});
 
 
 function onBookVisit() {
   // 这里可以放跳转预约页面或者弹窗逻辑
   alert('预约看房功能暂未实现');
 }
+
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+//const rentValue = "10251" // 定义租金数据
+
+const navigateToContract = () => {
+  router.push({
+    path: '/contract',
+    query: { rent: form.value.price ,
+            landlord: props.house.landlord,
+            phone: props.house.phone_num
+    } // 通过query参数传递
+  })
+}
+
+const showDatePicker = ref(false);
+const selectedDate = ref(null);
+
+const onDateSelected = async (date: string | Date) => {
+  console.log("选择的日期是：", date);
+  //showDatePicker.value = false; / 选择后隐藏日期选择器
+
+try {
+    const response = await fetch('http://localhost:5000/appointments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: "aaaa",
+        time: date.toISOString(),
+        property: "万科魅力之城武广新城" // 可以添加更多房产信息
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('网络响应不正常');
+    }
+
+    const data = await response.json();
+    console.log('后端响应:', data);
+    alert('预约日期提交成功！');
+    showDatePicker.value = false;
+  } catch (error) {
+    console.error('提交日期失败:', error);
+    alert('提交日期失败，请稍后再试');
+  }
+
+};
+
 </script>
 
 <template>
@@ -96,10 +107,17 @@ function onBookVisit() {
           show-arrows="hover"
         >
           <v-carousel-item
-            v-for="(item, index) in detail.photos"
+            v-for="(item, index) in mediaList"
             :key="index"
           >
+            <video
+              v-if="form.videos.length > 0"
+              :src="item"
+              controls
+              style="width: 100%; height: 100%; object-fit: cover"
+            />
             <img
+              v-else
               :src="item"
               style="width: 100%; height: 100%; object-fit: cover"
             />
@@ -181,25 +199,42 @@ function onBookVisit() {
     <div class="d-flex align-center mb-3">
       <v-icon color="primary" class="mr-2">mdi-account</v-icon>
       <span>房东：{{ house.landlord }}（{{ house.phone_num }}）</span>
+
+      <v-chip color="green" 
+                    variant="outlined"
+                    @click="navigateToContract"
+                    style="cursor: pointer">立即签约！</v-chip><br/>
+
     </div>
     <div class="d-flex align-center mb-3">
-    <v-btn
+      <v-btn
       color="primary"
       class="mt-4"
       large
-      @click="onBookVisit"
+      @click="showDatePicker = !showDatePicker"
     >
       预约看房
     </v-btn>
+
+     <v-row v-if="showDatePicker" justify="center">
+    <v-col cols="12" sm="8" md="6">
+      <v-date-picker
+        color="primary"
+        v-model="selectedDate"
+        @update:modelValue="onDateSelected"
+      ></v-date-picker>
+    </v-col>
+  </v-row>
+<br>
     <v-spacer></v-spacer>
-    <v-btn
+    <!--<v-btn
       color="primary"
       class="mt-4"
       large
       @click="onBookVisit"
     >
       联系我们
-    </v-btn>
+    </v-btn>-->
     </div>
   </div>
 </v-col>

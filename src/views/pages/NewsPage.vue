@@ -1,7 +1,5 @@
 <template>
-  <News :newsList="newsData" />
   <div>
-
     <!-- 房东新闻管理 -->
     <div class="mt-8 px-4">
       <div class="d-flex align-center justify-space-between mb-4">
@@ -16,11 +14,35 @@
         item-key="id"
         dense
       >
+        <template #item.id="{ item }">
+          {{ item.id }}
+        </template>
+
+        <template #item.content="{ item }">
+          <span :title="item.content">
+            {{ item.content.length > 50 ? item.content.substring(0, 50) + '...' : item.content }}
+          </span>
+        </template>
+
+        <template #item.publish_time="{ item }">
+          {{ formatDate(item.publish_time) }}
+        </template>
+
         <template #item.actions="{ item, index }">
-          <v-btn icon color="primary" @click="openEditDialog(item, index)" :title="'编辑 ' + item.title">
+          <v-btn
+            icon
+            color="primary"
+            @click="openEditDialog(item, index)"
+            :title="'编辑 ' + item.title"
+          >
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
-          <v-btn icon color="red" @click="confirmDelete(item, index)" :title="'删除 ' + item.title">
+          <v-btn
+            icon
+            color="red"
+            @click="confirmDelete(item, index)"
+            :title="'删除 ' + item.title"
+          >
             <v-icon>mdi-delete</v-icon>
           </v-btn>
         </template>
@@ -34,6 +56,11 @@
         <v-card-text>
           <v-text-field v-model="editForm.title" label="标题" />
           <v-textarea v-model="editForm.content" label="内容" rows="4" />
+          <v-text-field
+            label="发布时间"
+            :value="formatDate(editForm.publish_time)"
+            readonly
+          />
         </v-card-text>
         <v-card-actions>
           <v-spacer />
@@ -46,87 +73,165 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from "vue";
 
-import News from '../../components/houseDetail/News.vue'
-
-const newsData = [
-  {
-    title: "北京租赁市场回暖，空置率下降",
-    content: "北京市核心区域的住宅空置率同比下降了5%。随着政策利好，租赁市场持续回暖，租金稳中有升。",
-    bgImage: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    title: "上海二手房均价创新高",
-    content: "上海市区二手房均价突破5万元/平方米，市场竞争加剧。",
-    bgImage: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    title: "装修品质成选择关键",
-    content: "近七成租客更倾向于选择装修精良的房源，装修标准逐渐成为竞争力焦点。",
-    bgImage: "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=800&q=80"
-  }
-]
-
-import { ref } from "vue";
-import axios from "axios";
-
-
-// 新闻数据（前端维护）
-const landlordNews = ref([
-  { id: 1, title: "租赁新政策", content: "近期出台了新的租赁政策。" },
-  { id: 2, title: "维修服务升级", content: "维修服务时间缩短至24小时内响应。" },
-]);
+const landlordNews = ref([]);
 
 const headers = [
-  { text: "标题", value: "title", sortable: false },
-  { text: "内容", value: "content", sortable: false },
-  { text: "操作", value: "actions", sortable: false, align: "center" },
+  { key: "id", title: "新闻ID", sortable: false },
+  { key: "title", title: "标题", sortable: false },
+  { key: "content", title: "内容", sortable: false },
+  { key: "publish_time", title: "发布时间", sortable: false },
+  { key: "actions", title: "操作", sortable: false, align: "center" },
 ];
 
 const showEditDialog = ref(false);
 const editIndex = ref(null);
-const editForm = ref({ title: "", content: "" });
+const editForm = ref({ id: null, title: "", content: "", publish_time: "" });
 
-// 打开编辑弹窗
+async function fetchNews() {
+  try {
+    const res = await fetch('http://localhost:5000/news');
+    if (res.ok) {
+      const data = await res.json();
+      landlordNews.value = Array.isArray(data.data.items) ? data.data.items : [];
+      console.log('新闻列表加载成功', landlordNews.value);
+    } else {
+      alert("获取新闻失败: " + res.statusText);
+    }
+  } catch (e) {
+    alert("请求异常");
+    console.error('获取新闻失败:', e);
+  }
+}
+
+onMounted(() => {
+  fetchNews();
+});
+
+// 获取当前日期yyyy-mm-dd格式
+function getCurrentDate() {
+  const d = new Date();
+  return d.toISOString().slice(0, 10);
+}
+
 function openEditDialog(item = null, index = null) {
   if (item) {
-    editForm.value = { ...item };
+    console.log('编辑新闻项:', item);
+    editForm.value = {
+      id: item.id,
+      title: item.title,
+      content: item.content,
+      publish_time: item.publish_time ? item.publish_time.slice(0, 10) : getCurrentDate(),
+    };
     editIndex.value = index;
   } else {
-    editForm.value = { title: "", content: "" };
+    editForm.value = { id: null, title: "", content: "", publish_time: getCurrentDate() };
     editIndex.value = null;
   }
   showEditDialog.value = true;
 }
 
-// 关闭弹窗
 function closeEditDialog() {
   showEditDialog.value = false;
 }
 
-// 保存新闻（新增 or 编辑）
-async function saveNews() {
-  const { title, content } = editForm.value;
-  if (!title || !content) return alert("请填写完整信息");
-  closeEditDialog();
-
-  if (editIndex.value !== null) {
-    const id = landlordNews.value[editIndex.value].id;
-    landlordNews.value[editIndex.value] = { id, title, content };
-    await axios.put(`/api/news/${id}`, { title, content });
-  } else {
-    const newId = Date.now();
-    landlordNews.value.push({ id: newId, title, content });
-    await axios.post("/api/news", { id: newId, title, content });
-  }
-
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  return dateStr.slice(0, 10);
 }
 
-// 删除新闻
+async function saveNews() {
+  const id = editForm.value.id;
+  const title = editForm.value.title.trim();
+  const content = editForm.value.content.trim();
+  const publish_time = editForm.value.publish_time;
+
+  if (!title || !content) {
+    alert("请填写完整信息");
+    return;
+  }
+
+  try {
+    let res, responseData;
+    
+    if (editIndex.value !== null) {
+      // 编辑，PUT请求
+      res = await fetch(`http://localhost:5000/news/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, content, publish_time }),
+      });
+      
+      if (res.ok) {
+        responseData = await res.json();
+        console.log('更新成功，服务器返回:', responseData);
+        
+        // 找到列表中对应的项并更新
+        const itemIndex = landlordNews.value.findIndex(item => item.id === id);
+        if (itemIndex !== -1) {
+          // 使用服务器返回的数据更新现有项
+          // 注意：假设服务器返回完整的新闻对象
+          landlordNews.value[itemIndex] = {
+            ...landlordNews.value[itemIndex],  // 保留现有属性
+            ...responseData.data || responseData  // 合并服务器返回的数据
+          };
+          
+          // 强制更新引用以确保响应式更新
+          landlordNews.value = [...landlordNews.value];
+          console.log('更新后的新闻列表:', landlordNews.value);
+        } else {
+          console.error('找不到要更新的新闻项，ID:', id);
+          alert('更新失败：找不到新闻项');
+        }
+        
+        closeEditDialog();
+      } else {
+        alert("更新失败: " + res.statusText);
+      }
+    } else {
+      // 新增，POST请求
+      res = await fetch('http://localhost:5000/news', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, content, publish_time }),
+      });
+      
+      if (res.ok) {
+        responseData = await res.json();
+        console.log('新增成功，服务器返回:', responseData);
+        
+        // 将新新闻添加到数组开头而不是末尾
+        const newNews = responseData.data || responseData;
+        landlordNews.value.unshift(newNews);
+        
+        // 强制更新引用以确保响应式更新
+        landlordNews.value = [...landlordNews.value];
+        console.log('新增后的新闻列表:', landlordNews.value);
+        
+        closeEditDialog();
+      } else {
+        alert("新增失败: " + res.statusText);
+      }
+    }
+  } catch (e) {
+    alert("请求异常");
+    console.error(e);
+  }
+}
+
 async function confirmDelete(item, index) {
-  if (confirm("确认删除该新闻吗？")) {
-    landlordNews.value.splice(index, 1);
-    await axios.delete(`/api/news/${item.id}`);
+  if (!confirm("确认删除该新闻吗？")) return;
+  try {
+    const res = await fetch(`http://localhost:5000/news/${item.id}`, { method: "DELETE" });
+    if (res.ok) {
+      landlordNews.value.splice(index, 1);
+    } else {
+      alert("删除失败: " + res.statusText);
+    }
+  } catch (e) {
+    alert("删除请求异常");
+    console.error(e);
   }
 }
 </script>
@@ -139,7 +244,22 @@ async function confirmDelete(item, index) {
   padding-left: 1rem;
   padding-right: 1rem;
 }
-.v-sheet > div {
-  user-select: none;
+.d-flex {
+  display: flex;
+}
+.align-center {
+  align-items: center;
+}
+.justify-space-between {
+  justify-content: space-between;
+}
+.mb-4 {
+  margin-bottom: 1rem;
+}
+.text-2xl {
+  font-size: 1.5rem;
+}
+.font-bold {
+  font-weight: bold;
 }
 </style>

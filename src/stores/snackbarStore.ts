@@ -17,31 +17,25 @@ export const useSnackbarStore = defineStore({
 
   getters: {},
   actions: {
-    showMessage(message: MessageType) {
+    // 修正：参数改为 string 类型，表示消息内容
+    showMessage(message: string, type: MessageType = "") {
       this.isShow = true;
       this.message = message;
-      this.type = "";
+      this.type = type;
     },
 
-    showErrorMessage(message: MessageType) {
-      this.isShow = true;
-      this.message = message;
-      this.type = "error";
+    // 其他方法保持逻辑不变，但参数类型改为 string
+    showErrorMessage(message: string) {
+      this.showMessage(message, "error");
     },
-    showSuccessMessage(message: MessageType) {
-      this.isShow = true;
-      this.message = message;
-      this.type = "success";
+    showSuccessMessage(message: string) {
+      this.showMessage(message, "success");
     },
-    showInfoMessage(message: MessageType) {
-      this.isShow = true;
-      this.message = message;
-      this.type = "info";
+    showInfoMessage(message: string) {
+      this.showMessage(message, "info");
     },
-    showWarningMessage(message: MessageType) {
-      this.isShow = true;
-      this.message = message;
-      this.type = "warning";
+    showWarningMessage(message: string) {
+      this.showMessage(message, "warning");
     },
   },
 });
