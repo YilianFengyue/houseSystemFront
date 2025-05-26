@@ -107,17 +107,10 @@ try {
           show-arrows="hover"
         >
           <v-carousel-item
-            v-for="(item, index) in mediaList"
+            v-for="(item, index) in detail.photos"
             :key="index"
           >
-            <video
-              v-if="form.videos.length > 0"
-              :src="item"
-              controls
-              style="width: 100%; height: 100%; object-fit: cover"
-            />
             <img
-              v-else
               :src="item"
               style="width: 100%; height: 100%; object-fit: cover"
             />
