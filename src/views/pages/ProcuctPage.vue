@@ -38,7 +38,7 @@ const house =ref(
         decoration: "精装",
         direction: "南",
         house_num: "10001",
-        id: 1,
+        id: Number(route.params.id)||2,
         image_url: "https://i.pinimg.com/736x/c4/3a/90/c43a90fcf336e05d7f849b527f067464.jpg",
         landlord: "张先生",
         page_views: "108次浏览",
@@ -57,12 +57,14 @@ const fetchHouce = async () => {
   try {
     const response = await axios.get(`http://localhost:5000/houseinfo/${house.value.id}`);
     house.value = response.data.data; // 假设返回的是数组
+    console.log(house.value);
   } catch (error) {
     console.error("获取数据失败:", error);
   }
 };
 const fetchHouseDetail = async () => {
   try {
+      console.log("当前house.id:", house.value.id); // 添加调试输出
     const response = await axios.get(`http://localhost:5000/housedetail/${house.value.id}`);
     detail.value = response.data.data; // 假设返回的是数组
   } catch (error) {
