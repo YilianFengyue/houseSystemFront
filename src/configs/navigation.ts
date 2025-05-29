@@ -40,6 +40,16 @@ export default {
           icon: "mdi-newspaper",
         },
         {
+          text: "测试管理页面2",
+          link: "/testManagePage",
+          icon: "mdi-newspaper",
+        },
+        {
+          text: "测试管理页面3",
+          link: "/testManagePage2",
+          icon: "mdi-newspaper",
+        },
+        {
           icon: "mdi-robot-excited-outline",
           text: "AI选购顾问",
           link: "/ai/chatbot_v1",
