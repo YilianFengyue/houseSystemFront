@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+
 // --- Data for search fields ---
 const searchLocation = ref('');
 // 明确类型，null 表示未选择，或者可以给一个默认值如 '公寓'
@@ -53,22 +54,22 @@ const scrollToTop = () => {
 
 <template>
   <v-card class="my-5" rounded="lg" flat>
-    <v-parallax src="/images/house.jpg" height="600" class="mb-5">
-      <div class="d-flex flex-column fill-height justify-center align-center text-white">
+    <v-parallax src="https://d214hhm15p4t1d.cloudfront.net/nzr/53a4e4fe9010d5483dc376d42b350ceab3334cf7/img/homepage-desktop.1a4dc43e.svg" height="800" class="mb-5">
+      <div class="d-flex flex-column fill-height justify-center align-center source-han">
         <div class="text-center pa-5">
           <v-responsive class="mx-auto" max-width="850px"> 
-            <h1 class="text-h3 text-sm-h2 text-md-h1 font-weight-bold mb-6">
+            <h1 class="text-h3 black text-sm-h2 text-md-h1 font-weight-bold mb-5 text-primary">
               发现您的理想之家
             </h1>
             <p
-              class="text-h6 text-sm-h5 mb-8"
+              class="text-h6 text-sm-h5 mb-8 text-primary font-weight-bold source-han"
               style="opacity: 0.85;" 
             >
               轻松搜索、比较并租赁最适合您的房源
             </p>
             <v-sheet
               color="rgba(255, 255, 255, 0.92)" 
-              class="pa-6 pa-md-8 rounded-xl"
+              class="pa-6 pa-md-8 rounded-md"
               elevation="6" 
             >
               <v-row align="center" justify="center" dense>
@@ -99,7 +100,7 @@ const scrollToTop = () => {
                   <v-btn
                     color="primary"
                     block
-                    size="x-large"
+                    size="large"
                     @click="performSearch"
                     prepend-icon="mdi-magnify" 
                     class="search-button"
@@ -129,12 +130,11 @@ const scrollToTop = () => {
   // 在小屏幕上可能不需要 block，或者需要调整其行为
   // Vuetify 的 v-col 已经处理了堆叠，这里的 block 主要是为了填满 md="3" 的宽度
 }
-// 如果 opacit-80 是你自定义的类，可以保留
-// .opacit-80 {
-//   opacity: 0.8;
-// }
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap');
 
-// 垂直居中parallax中的内容 (Vuetify 3 d-flex 类可以实现)
-// v-parallax 内部的 div 使用了 d-flex flex-column fill-height justify-center align-center
-// 这会使其内容垂直和水平居中
+.source-han {
+  font-family: 'Noto Sans SC', 'Source Han Sans SC', 'Microsoft YaHei', sans-serif;
+  color: #000;
+}
+
 </style>

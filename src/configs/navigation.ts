@@ -25,6 +25,11 @@ export default {
           icon: "mdi-view-dashboard-outline",
         },
         {
+          text: "管理员界面",
+          link: "/admin",
+          icon: "mdi-android-studio",
+        },
+        {
           text: "房源管理",
           link: "/landlord",
           icon: "mdi-home-outline",

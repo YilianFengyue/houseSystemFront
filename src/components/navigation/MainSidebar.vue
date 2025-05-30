@@ -38,6 +38,7 @@ const scrollToBottom = () => {
     border="none"
     elevation="1"
     v-model="customizeTheme.mainSidebar"
+    temporary
     id="mainMenu"
   >
     <!-- ---------------------------------------------- -->
@@ -51,8 +52,8 @@ const scrollToBottom = () => {
       >
         <h1 class="logo-text h-full">
           <!-- <Icon class="mr-2" width="40" icon="solar:plain-bold-duotone" /> -->
-          <Icon icon="fluent-color:home-16" />
-          <span>易找房</span>
+          <img src="@/assets/logo-house.svg" alt="Logo" width="20" height="20" style="margin-right:10px" />
+          <span> 好客租房</span>
         </h1>
       </v-card>
     </template>

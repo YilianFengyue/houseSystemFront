@@ -208,16 +208,16 @@ try {
     >
       预约看房
     </v-btn>
-
-     <v-row v-if="showDatePicker" justify="center">
-    <v-col cols="12" sm="8" md="6">
-      <v-date-picker
-        color="primary"
-        v-model="selectedDate"
-        @update:modelValue="onDateSelected"
-      ></v-date-picker>
-    </v-col>
-  </v-row>
+    
+    <v-row v-if="showDatePicker" justify="center">
+      <v-col cols="12" sm="8" md="6">
+        <v-date-picker
+          color="primary"
+          v-model="selectedDate"
+          @update:modelValue="onDateSelected"
+        ></v-date-picker>
+      </v-col>
+    </v-row>
 <br>
     <v-spacer></v-spacer>
     <!--<v-btn

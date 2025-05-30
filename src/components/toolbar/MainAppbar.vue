@@ -10,7 +10,7 @@ import { useDisplay } from "vuetify";
 import { useCustomizeThemeStore } from "@/stores/customizeTheme";
 import ToolbarNotifications from "./ToolbarNotifications.vue";
 import ToolbarUser from "./ToolbarUser.vue";
-
+import ThemeToggle from "./ThemeToggle.vue";
 //search
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -87,6 +87,7 @@ const color = ref('indigo')
       </v-btn>
 
       <div class="d-flex">
+        <ThemeToggle />
         <ToolbarUser />
       </div>
     </div>

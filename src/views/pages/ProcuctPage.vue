@@ -7,7 +7,7 @@ import HouseCard1 from "~/src/components/houseDetail/HouseCard1.vue";
 import Newsletter2 from "~/src/components/houseDetail/Newsletter2.vue";
 import Feature5 from "~/src/components/houseDetail/Feature5.vue";
 import HouseFacilities from "~/src/components/houseDetail/HouseFacilities.vue";
-import Map from "~/src/components/dashboard/Map.vue";
+import Map from "~/src/components/houseDetail/Map.vue";
 import { onMounted } from "vue";
 const route = useRoute();
 const id = route.params.id;

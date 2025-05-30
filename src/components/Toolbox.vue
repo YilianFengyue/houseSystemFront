@@ -20,7 +20,9 @@ const toolboxShow = ref(false);
     size="50"
     color="white"
   >
-    <Icon width="30" icon="ri:openai-fill" />
+    <!-- <Icon width="30" icon="ri:openai-fill" /> -->
+     <!-- 支持Deepseek -->
+    <img src="@/assets/images/avatars/deepseek.png" alt="DeepSeek Logo" width="30" height="30" />
   </v-btn>
 
   <transition name="slide-y">

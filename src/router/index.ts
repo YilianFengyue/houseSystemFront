@@ -57,6 +57,15 @@ export const routes = [
     },
     component: () => import("@/views/pages/ProcuctPage.vue"),
   },
+  //管理员
+  {
+    path: "/admin",
+    meta: {
+      requiresAuth: true,
+      layout: "landing",
+    },
+    component: () => import("@/views/pages/Admin/AdministratorPanel.vue"),
+  },
   {
     path: "/house/:id",
     meta: {
