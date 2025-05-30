@@ -28,7 +28,7 @@ onMounted(() => {
 <template>
   <div class="pa-5">
     <!-- 顶端放新闻组件 -->
-    <!-- <News/> -->
+    
     <!-- BannerPage -->
     <v-row class="flex-0" dense>
       <v-col cols="12" xl="4" class="full-width-banner">
@@ -39,6 +39,9 @@ onMounted(() => {
     <v-row class="flex-0" dense>
       <v-col cols="12" xl="4">
         <CityCard></CityCard>
+      </v-col>
+      <v-col cols="12" xl="4">
+       <News/>
       </v-col>
     </v-row>
     
@@ -52,6 +55,7 @@ onMounted(() => {
       <v-col cols="12" xl="4">
         <NewHouseList></NewHouseList>
       </v-col>
+      
     </v-row>
     
     <v-row class="flex-0" dense>
