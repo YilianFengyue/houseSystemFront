@@ -16,6 +16,8 @@ import { createVueI18nAdapter } from "vuetify/locale/adapters/vue-i18n";
 import { useI18n } from "vue-i18n";
 import i18n from "@/plugins/i18n";
 import * as labs from "vuetify/labs/components";
+// 1. 直接从 vuetify/locale 导入中文语言包
+import { zhHans } from 'vuetify/locale'
 
 // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
 
@@ -90,7 +92,10 @@ export default createVuetify({
       variant: "solo",
     },
   },
+ // 2. 添加 locale 配置块
   locale: {
-    adapter: createVueI18nAdapter({ i18n, useI18n }),
+    locale: 'zhHans', // 设置当前默认语言
+    fallback: 'en', // 设置回退语言
+    messages: { zhHans }, // 将导入的语言包提供给 Vuetify
   },
 });

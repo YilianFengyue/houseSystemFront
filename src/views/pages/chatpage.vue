@@ -10,7 +10,7 @@
               'other-message': message.sender_username !== currentUser
             }">
               <v-avatar class="ml-4" rounded="sm" variant="elevated">
-                <img :src="message.sender_username === currentUser.value 
+                <img :src="message.sender_username === currentUser 
                   ? 'https://images.unsplash.com/photo-1494526585095-c41746248156' 
                   : 'https://images.unsplash.com/photo-1494526585095-c41746248156'" 
                   :alt="message.sender_username" />
@@ -34,9 +34,9 @@
         </perfect-scrollbar>
         <div class="no-message-container" v-else>
           <h1 class="text-h4 text-md-h2 text-primary font-weight-bold">
-            {{ currentUser }}与LU的聊天室
+            {{ currentUser }}与{{ landlord }}的聊天室
           </h1>
-          <p class="text-grey">开始与LU交流吧</p>
+          <p class="text-grey">开始与{{ landlord }}交流吧</p>
         </div>
       </div>
     </div>
@@ -87,16 +87,19 @@
 <script setup lang="ts">
 import { useProfileStore } from "@/stores/profileStore";
 import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
 import { scrollToBottom } from "@/utils/common";
 import { useSnackbarStore } from "@/stores/snackbarStore";
 import io from 'socket.io-client';
 
-// ---------------------------
-// 默认用户已登录，固定为Andy
-// ---------------------------
-const currentUser = ref('Andy');
+const route = useRoute();
 const profileStore = useProfileStore();
 const snackbarStore = useSnackbarStore();
+
+// 从路由参数获取房东信息
+const landlord = ref(route.query.landlord as string || '房东');
+// 当前用户从profileStore获取
+const currentUser = ref(profileStore.user.name);
 
 interface Message {
   message_id: string;
@@ -132,11 +135,13 @@ socket.on('new_message', (newMessage) => {
   scrollToBottom(document.querySelector(".message-container"));
 });
 
-// 从后端API获取当前用户（Andy）和LU的消息
+// 从后端API获取当前用户和房东的消息
 const fetchMessagesFromAPI = async () => {
   isLoading.value = true;
   try {
-    const response = await fetch(`http://localhost:5000/comments/messages?user1=${currentUser.value}&user2=LU`);
+    const response = await fetch(
+      `http://localhost:5000/comments/messages?user1=${currentUser.value}&user2=${landlord.value}`
+    );
     if (!response.ok) {
       throw new Error('获取消息失败');
     }
@@ -177,7 +182,7 @@ const sendMessage = async () => {
     message_id: Date.now().toString(),
     content: userMessage.value,
     sender_username: currentUser.value,
-    receiver_username: 'LU',
+    receiver_username: landlord.value,
     timestamp: Date.now()
   };
 
@@ -204,12 +209,13 @@ const handleKeydown = (e: KeyboardEvent) => {
 };
 
 onMounted(async () => {
-  // 从API加载当前用户（Andy）和LU的消息
+  // 从API加载当前用户和房东的消息
   await fetchMessagesFromAPI();
 });
 </script>
 
 <style scoped lang="scss">
+/* 原有样式保持不变 */
 .chat-room {
   background-repeat: repeat;
   height: 100%;
@@ -265,12 +271,12 @@ onMounted(async () => {
 
 .other-message {
   display: flex;
-  align-content: center;
-  justify-content: flex-start;
-  
-  .v-card {
-    background: linear-gradient(45deg, #4CAF50, #8BC34A);
-  }
+    align-content: center;
+    justify-content: flex-start;
+    
+    .v-card {
+      background: linear-gradient(45deg, #4CAF50, #8BC34A);
+    }
 }
 
 .message-container {

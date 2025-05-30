@@ -58,6 +58,15 @@ const navigateToContract = () => {
   })
 }
 
+const navigateToChat = () => {
+  router.push({
+    path: '/chat',
+    query: { landlord: props.house.landlord,
+            phone: props.house.phone_num
+    } // 通过query参数传递
+  })
+}
+
 const showDatePicker = ref(false);
 const selectedDate = ref(null);
 
@@ -107,17 +116,10 @@ try {
           show-arrows="hover"
         >
           <v-carousel-item
-            v-for="(item, index) in mediaList"
+            v-for="(item, index) in detail.photos"
             :key="index"
           >
-            <video
-              v-if="form.videos.length > 0"
-              :src="item"
-              controls
-              style="width: 100%; height: 100%; object-fit: cover"
-            />
             <img
-              v-else
               :src="item"
               style="width: 100%; height: 100%; object-fit: cover"
             />
@@ -203,7 +205,13 @@ try {
       <v-chip color="green" 
                     variant="outlined"
                     @click="navigateToContract"
-                    style="cursor: pointer">立即签约！</v-chip><br/>
+                    style="cursor: pointer">立即签约！</v-chip>
+                    &nbsp;&nbsp;
+      <v-chip color="red" 
+                    variant="outlined"
+                    @click="navigateToChat"
+                    style="cursor: pointer">咨询房东！</v-chip>              
+      <br/>
 
     </div>
     <div class="d-flex align-center mb-3">
@@ -216,8 +224,9 @@ try {
       预约看房
     </v-btn>
 
+    
      <v-row v-if="showDatePicker" justify="center">
-    <v-col cols="12" sm="8" md="6">
+    <v-col cols="12" sm="8" md="6" class="date-picker-overlay">
       <v-date-picker
         color="primary"
         v-model="selectedDate"
@@ -247,4 +256,17 @@ try {
 .text-red {
   color: #e53935;
 }
+
+/*日期选择部分浮动设置*/
+.date-picker-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 99999;
+  padding: 0px;
+  border-radius: 5px;
+}
+
+
 </style>

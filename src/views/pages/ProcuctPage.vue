@@ -12,16 +12,16 @@ import { onMounted } from "vue";
 const route = useRoute();
 const id = route.params.id;
 
-const detail = ref({ // 这是你给的示例数据结构
+const detail = ref({ 
   created_at: "2025-05-22T21:32:16",
   detail_id: 1,
-  facilities: { // 这个对象会传递给 AmenitiesDisplay 组件
+  facilities: { 
     tv: true,
     washer: true,
     wifi: true,
-    refrigerator: true, // 添加一些来测试
+    refrigerator: true, 
     bed: true,
-    airconditioner: false // 这个不会显示
+    airconditioner: false 
   },
   house_info_id: 1,
   map_coordinates: { lat: 30.0, lng: 120.0 }, // 修正了下 map_coordinates 格式
@@ -38,7 +38,7 @@ const house =ref(
         decoration: "精装",
         direction: "南",
         house_num: "10001",
-        id: Number(route.params.id)||2,
+        id: 1,
         image_url: "https://i.pinimg.com/736x/c4/3a/90/c43a90fcf336e05d7f849b527f067464.jpg",
         landlord: "张先生",
         page_views: "108次浏览",
@@ -55,17 +55,15 @@ const house =ref(
 );
 const fetchHouce = async () => {
   try {
-    const response = await axios.get(`http://localhost:5000/houseinfo/${house.value.id}`);
+    const response = await axios.get(`http://localhost:5000/houseinfo/${id}`);
     house.value = response.data.data; // 假设返回的是数组
-    console.log(house.value);
   } catch (error) {
     console.error("获取数据失败:", error);
   }
 };
 const fetchHouseDetail = async () => {
   try {
-      console.log("当前house.id:", house.value.id); // 添加调试输出
-    const response = await axios.get(`http://localhost:5000/housedetail/${house.value.id}`);
+    const response = await axios.get(`http://localhost:5000/housedetail/${id}`);
     detail.value = response.data.data; // 假设返回的是数组
   } catch (error) {
     console.error("获取数据失败:", error);
@@ -75,6 +73,8 @@ onMounted(() => {
   console.log("Dashboard mounted");
   fetchHouce();
   fetchHouseDetail();
+  console.log("House data:", house.value);
+  console.log("House detail data:", detail.value);
 });
 </script>
 
@@ -90,9 +90,9 @@ onMounted(() => {
       <v-col cols="12" xl="4">
           <Map :address="`湖南省长沙市${house.region}${house.block}${house.community}`" />
       </v-col>
-      <v-col cols="12" xl="4">
-        <Feature5 />
-        <Newsletter2 />
+      <v-col cols="12" xl="12">
+        <Feature5 :houseId="id"/>
+        <!-- <Newsletter2 :houseId="id" /> -->
       </v-col>
     </v-row>
   </div>

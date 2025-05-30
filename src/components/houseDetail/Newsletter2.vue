@@ -3,7 +3,15 @@
 * @Maintainer: J.K. Yang
 * @Description:
 -->
-<script setup lang="ts"></script>
+<script setup lang="ts">
+/*接受房源ID作为props*/
+defineProps({
+  houseId: {
+    type: String,
+    required: true
+  }
+});
+</script>
 
 <template>
   <v-toolbar height="60">
@@ -29,7 +37,7 @@
         <v-row align="center" justify="center">
           <v-col cols="12" lg="3">
             <h1 class="text-h5 font-weight-bold text-center">
-              Receive updates in your inbox
+              当前房源ID: {{ houseId }}
             </h1>
             <p class="ml-2 text-center text-lg-left">Sign up today</p>
           </v-col>
