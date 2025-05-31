@@ -7,7 +7,7 @@ import HouseCard1 from "~/src/components/houseDetail/HouseCard1.vue";
 import Newsletter2 from "~/src/components/houseDetail/Newsletter2.vue";
 import Feature5 from "~/src/components/houseDetail/Feature5.vue";
 import HouseFacilities from "~/src/components/houseDetail/HouseFacilities.vue";
-import Map from "~/src/components/houseDetail/Map.vue";
+import Map from "~/src/components/HouseDetail/Map.vue";
 import { onMounted } from "vue";
 const route = useRoute();
 const id = route.params.id;
@@ -90,9 +90,8 @@ onMounted(() => {
       <v-col cols="12" xl="4">
           <Map :address="`湖南省长沙市${house.region}${house.block}${house.community}`" />
       </v-col>
-      <v-col cols="12" xl="4">
-        <Feature5 />
-        <Newsletter2 />
+      <v-col cols="12" xl="12">
+        <Feature5 :houseId="id"/>
       </v-col>
     </v-row>
   </div>

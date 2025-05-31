@@ -176,6 +176,14 @@ export const routes = [
       },
       component: () => import("@/views/pages/contractpage.vue"),
     },
+    {
+      path: "/RentHouse",
+      meta: {
+        requiresAuth: true,
+        layout: "landing",
+      },
+      component: () => import("@/views/pages/AccountRentHouse.vue"),
+    },
 
   ...LandingRoutes,
   ...AuthRoutes,

@@ -73,13 +73,13 @@ const color = ref('indigo')
       </div>
       <v-spacer></v-spacer>
 
-      <!-- 新增：扳手按钮 -->
+      <!-- 新增：扳手按钮 
       <v-btn
         class="ma-2"
         color="grey"
         icon="mdi-wrench"
         @click="toggleFixCard"
-      ></v-btn>
+      ></v-btn>-->
 
       <ToolbarNotifications />
       <v-btn icon @click="customizeTheme.themeDrawer = !customizeTheme.themeDrawer">

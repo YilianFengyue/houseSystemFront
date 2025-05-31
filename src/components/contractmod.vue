@@ -182,7 +182,7 @@ const formData = ref({
   landlordName: '',
   landlordId: '',
   landlordPhone: '',
-  tenantName: '',
+  tenantName: username,
   tenantId: '',
   tenantPhone: ''
 })
@@ -207,7 +207,8 @@ const submitContract = async () => {
       tenantId: formData.value.tenantId || '',
       tenantPhone: formData.value.tenantPhone || '',
       formattedRent: formatCurrency(rentValue.value),
-      currentDate: new Date().toISOString().split('T')[0]
+      currentDate: new Date().toISOString().split('T')[0],
+      houseid: houseid.value, // 新增房源ID
     }
 
     const response = await fetch('http://localhost:5000/contracts', {
@@ -239,17 +240,20 @@ const route = useRoute()
 const rentValue = ref('')
 const landlordName = ref('')
 const landlordPhone = ref('')
-
+const houseid = ref('') // 新增房源ID变量
 
 // 从路由参数获取租金
 onMounted(() => {
   rentValue.value = route.query.rent?.toString() || ''
   landlordName.value = route.query.landlord?.toString() || ''
   landlordPhone.value = route.query.phone?.toString() || ''
-  
+  houseid.value = route.query.houseid?.toString() || ''
+  console.log('Received houseid:', houseid.value) // 调试输出
+
   // 自动填充到表单数据中
   formData.value.landlordName = landlordName.value
   formData.value.landlordPhone = landlordPhone.value
+  formData.value.landlordId = houseid.value // 新增房源ID
 })
 
 // 数字转中文大写

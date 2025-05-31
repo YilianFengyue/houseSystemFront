@@ -41,6 +41,15 @@ onMounted(() => {
   console.log("user", user);
   console.log("userStore", profileStore.user.addr);
 });
+
+import { useRouter } from 'vue-router'
+const router = useRouter()
+//const route = useRoute()
+const navigateToRent = () => {
+  router.push({
+    path: '/RentHouse'
+  })
+}
 </script>
 
 Basic with Icons
@@ -224,6 +233,18 @@ Basic with Icons
           <v-divider></v-divider>
           <v-card-actions class="pa-5">
             <v-spacer></v-spacer>
+
+            <v-btn
+              class="px-5"
+              color="primary"
+              elevation="1"
+              variant="elevated"
+              @click="navigateToRent"
+            >
+              Check Rent</v-btn
+            >
+
+
             <v-btn
               class="px-5"
               color="primary"
