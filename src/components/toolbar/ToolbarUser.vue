@@ -20,7 +20,7 @@ const router = useRouter();
 //用户相关信息#################################
 import { useProfileStore } from "@/stores/profileStore";
 const profileStore = useProfileStore();
-const account = reactive({ ...profileStore.account });
+const account = reactive({ ...profileStore.user });
 const signon = reactive({ ...profileStore.signon });
 //#############################################
 
@@ -33,10 +33,8 @@ const authStore = useAuthStore();
 const handleLogout = () => {
   // 清除 token
   tokenStore.removeToken();
-  // 跳转到首页
-  router.push("/");  // 可以根据需要修改首页路径
-  // 刷新页面
-  window.location.reload();  // 刷新页面
+  // 跳转到首页 dashboard
+  window.location.href = "/dashboard";  // 这样会触发完整页面加载
 };
 const goToSignIn = () => {
   router.push("/auth/signin");  // 跳转到登录页
@@ -163,7 +161,7 @@ onMounted(() => {
           </template>
 
           <v-list-item-title class="font-weight-bold text-primary">
-            {{signon.username}}
+            {{account.name}}
             <StatusMenu />
           </v-list-item-title>
           <v-list-item-subtitle>

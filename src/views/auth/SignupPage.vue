@@ -23,7 +23,7 @@ const handleRegister = async () => {
   if (valid) {
     isLoading.value = true;
     isSignInDisabled.value = true;
-    authStore.registerWithUsernameAndPassword(phone.value, password.value);
+    authStore.registerWithUsernameAndPassword(phone.value, password.value, email.value);
   } else {
     console.log("no");
   }
@@ -86,6 +86,7 @@ const resetErrors = () => {
           @keyup.enter="handleRegister"
           @change="resetErrors"
         ></v-text-field>
+        
         <v-text-field
           ref="refEmail"
           v-model="email"

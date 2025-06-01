@@ -41,7 +41,7 @@ export const useAuthStore = defineStore("auth", {
     },
     //注册方法
 
-    async registerWithUsernameAndPassword(phone: string, password: string) {
+    async registerWithUsernameAndPassword(phone: string, password: string, email: string) {
       try {
 
         const response = await axios.post(
@@ -50,6 +50,7 @@ export const useAuthStore = defineStore("auth", {
           new URLSearchParams({
             phone,
             password,
+            email,
           }),
           {
             headers: {

@@ -7,14 +7,17 @@
 <script setup lang="ts">
 import { useProfileStore } from "@/stores/profileStore";
 import { Icon } from "@iconify/vue";
-
+import { ref, computed } from 'vue';
+import { formatIdCard } from '@/utils/formatIdCard';
+import { useRouter } from 'vue-router';
+import axios from 'axios'; // 引入 axios
 
 const profileStore = useProfileStore();
-//相关信息
+// 相关信息
 const newpassword = ref("");
 const confirmPassword = ref("");
 // 使用 storeToRefs 包裹 store 实例，然后再解构
-const user = reactive({ ...profileStore.user});
+const user = reactive({ ...profileStore.user });
 const account = reactive({ ...profileStore.account });
 const signon = reactive({ ...profileStore.signon });
 const authorized = reactive({
@@ -42,19 +45,148 @@ onMounted(() => {
   console.log("userStore", profileStore.user.addr);
 });
 
-import { useRouter } from 'vue-router'
-const router = useRouter()
-//const route = useRoute()
+const router = useRouter();
 const navigateToRent = () => {
   router.push({
     path: '/RentHouse'
-  })
-}
+  });
+};
+
+// 身份证隐秘
+const rawIdCard = ref(user.identityCard || ''); // 存储原始值（无脱敏）
+const isEditingIdCard = ref(false); // 标记是否正在编辑
+
+const formattedIdCard = computed({
+  get: () => {
+    if (!rawIdCard.value) return '';
+    
+    // 正在编辑时，显示原始值（不脱敏）
+    if (isEditingIdCard.value) {
+      return rawIdCard.value;
+    }
+    
+    // 非编辑状态：脱敏显示（前3 + 12* + 后3）
+    const len = rawIdCard.value.length;
+    if (len <= 6) {
+      return rawIdCard.value; // 不足6位不脱敏
+    }
+    const prefix = rawIdCard.value.substring(0, 3);
+    const suffix = rawIdCard.value.substring(Math.max(len - 3, 3));
+    return `${prefix}${'*'.repeat(len - 6)}${suffix}`;
+  },
+  set: (newValue) => {
+    // 用户输入时，存储原始值（移除空格和*）
+    const cleanedValue = newValue.replace(/[\s*]/g, '');
+    rawIdCard.value = cleanedValue;
+    user.identityCard = cleanedValue;
+  }
+});
+
+// 监听输入框焦点状态
+const onIdCardFocus = () => {
+  isEditingIdCard.value = true; // 聚焦时显示原始值
+};
+const onIdCardBlur = () => {
+  isEditingIdCard.value = false; // 失焦时恢复脱敏，脱敏即如 510***********123
+};
+
+// 添加修改密码的方法
+const updatePassword = async () => {
+  if (newpassword.value !== confirmPassword.value) {
+    snackbar.color = 'error';
+    snackbar.message = '两次输入的密码不一致，请重新输入！';
+    snackbar.show = true;
+    return;
+  }
+
+  const id = profileStore.getUserId(); // 获取用户 ID
+
+  try {
+    const response = await axios.put('http://localhost:5000/user/userinfo/password', {
+      id, // 添加 id 参数
+      name: user.name,
+      password: newpassword.value
+    });
+
+    if (response.data.code === 200) {
+      snackbar.color = 'success';
+      snackbar.message = '密码更新成功';
+      snackbar.show = true;
+      newpassword.value = '';
+      confirmPassword.value = '';
+      showPasswordMismatch.value = false;
+    } else {
+      snackbar.color = 'error';
+      snackbar.message = response.data.message;
+      snackbar.show = true;
+    }
+  } catch (error) {
+    console.error('更新密码时出错:', error);
+    snackbar.color = 'error';
+    snackbar.message = '服务器内部错误，请稍后再试';
+    snackbar.show = true;
+  }
+};
+
+const snackbar = reactive({
+  show: false,
+  message: '',
+  color: 'success'
+});
+
+const showPasswordMismatch = ref(false);
+
+const checkPasswordMatch = () => {
+  if (newpassword.value && confirmPassword.value) {
+    showPasswordMismatch.value = newpassword.value !== confirmPassword.value;
+  } else {
+    showPasswordMismatch.value = false;
+  }
+};
+
+
+// 添加更新用户信息的方法
+const updateUserInfo = async () => {
+  const id = profileStore.getUserId(); // 获取用户 ID
+
+  try {
+    const response = await axios.put('http://localhost:5000/user/userinfo', {
+      id, // 添加 id 参数
+      name: user.name,
+      addr: user.addr,
+      email: user.email,
+      phone: user.phone,
+      identityCard: user.identityCard
+    });
+
+    if (response.data.code === 200) {
+      snackbar.color = 'success';
+      snackbar.message = '用户信息更新成功';
+      snackbar.show = true;
+      // 更新本地存储的用户信息
+      profileStore.setUser(response.data.data);
+    } else {
+      snackbar.color = 'error';
+      snackbar.message = response.data.message;
+      snackbar.show = true;
+    }
+  } catch (error) {
+    console.error('更新用户信息时出错:', error);
+    snackbar.color = 'error';
+    snackbar.message = '服务器内部错误，请稍后再试';
+    snackbar.show = true;
+  }
+};
 </script>
 
-Basic with Icons
 <template>
   <v-sheet elevation="0" class="mx-auto" color="transparent" max-width="1600">
+
+    <!-- 添加Snackbar通知 -->
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+      {{ snackbar.message }}
+    </v-snackbar>
+
     <v-row>
       <v-col cols="12" md="3">
         <v-card>
@@ -98,142 +230,85 @@ Basic with Icons
         <!-- ---------------------------------------------- -->
         <v-card class="mb-5">
           <v-card-title class="py-4 font-weight-bold">
-            Basic Infomation
+            基本信息
           </v-card-title>
           <v-divider></v-divider>
           <v-card-text class="pa-7">
             <v-row>
-              <v-col cols="12" sm="6">
-                <v-label class="font-weight-medium mb-2">Username</v-label>
+              <v-col cols="12" sm="5">
+                <v-label class="font-weight-medium mb-2">用户名</v-label>
                 <v-text-field
                   v-model="user.name"
                   color="primary"
                   variant="outlined"
                   density="compact"
                   type="text"
-                  placeholder="Your Name"
+                  placeholder="你的名字"
                   hide-details
                 />
               </v-col>
-              <v-col cols="12" sm="">
-                <v-label class="font-weight-medium mb-2">地区</v-label>
+              <v-col cols="12" sm="5">
+                <v-label class="font-weight-medium mb-2">地址</v-label>
                 <v-text-field
                   v-model="user.addr"
                   color="primary"
                   variant="outlined"
                   density="compact"
                   type="text"
-                  placeholder="John Deo"
+                  placeholder="请输入您的地址"
                   hide-details
                 />
               </v-col>
-              <v-col cols="12" sm="3">
-                <v-label class="font-weight-medium mb-2">身份证号</v-label>
-                <v-text-field
-                  v-model="user.identityCard"
-                  color="primary"
-                  variant="outlined"
-                  density="compact"
-                  type="text"
-                  placeholder="John Deo"
-                  hide-details
-                />
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-label class="font-weight-medium mb-2">Email</v-label>
+            </v-row>
+            <v-row>
+              <v-col cols="12" sm="5">
+                <v-label class="font-weight-medium mb-2">邮箱</v-label>
                 <v-text-field
                   class="bg-blue-grey-lighten-5"
                   v-model="user.email"
-                  color="primary"
+                  color="White"
                   variant="outlined"
                   density="compact"
                   type="text"
-                  placeholder="John Deo"
+                  placeholder="请填写邮箱"
                   hide-details
-              /></v-col>
-              <v-col cols="12" sm="3">
-                <v-label class="font-weight-medium mb-2">Addr1</v-label>
+                />
+              </v-col>
+              <v-col cols="12" sm="5">
+                <v-label class="font-weight-medium mb-2">电话</v-label>
                 <v-text-field
                   class="bg-blue-grey-lighten-5"
-                  v-model="account.addr1"
-                  color="primary"
+                  v-model="user.phone"
+                  color="White"
                   variant="outlined"
                   density="compact"
                   type="text"
-                  placeholder="John Deo"
+                  placeholder="请填写电话"
                   hide-details
-              /></v-col>
-              <v-col cols="12" sm="3">
-                <v-label class="font-weight-medium mb-2">Addr2</v-label>
-                <v-text-field
-                  class="bg-blue-grey-lighten-5"
-
-                  v-model="account.addr2"
-                  color="primary"
-                  variant="outlined"
-                  density="compact"
-                  type="text"
-                  placeholder="John Deo"
-                  hide-details
-              /></v-col>
-              <v-col cols="12" sm="3">
-                <v-label class="font-weight-medium mb-2">City</v-label>
-                <v-text-field
-                  class="bg-blue-grey-lighten-5"
-                  
-                  v-model="account.city"
-                  color="primary"
-                  variant="outlined"
-                  density="compact"
-                  type="text"
-                  placeholder="John Deo"
-                  hide-details
-              /></v-col>
-              <v-col cols="12" sm="3">
-                <v-label class="font-weight-medium mb-2">Country</v-label>
-                <v-text-field
-                  class="bg-blue-grey-lighten-5"
-                  
-                  v-model="account.country"
-                  color="primary"
-                  variant="outlined"
-                  density="compact"
-                  type="text"
-                  placeholder="John Deo"
-                  hide-details
-              /></v-col>
-              <v-col cols="12" sm="3">
-                <v-label class="font-weight-medium mb-2">Zip</v-label>
-                <v-text-field
-                  class="bg-blue-grey-lighten-5"
-                  
-                  v-model="account.zip"
-                  color="primary"
-                  variant="outlined"
-                  density="compact"
-                  type="text"
-                  placeholder="John Deo"
-                  hide-details
-              /></v-col>
-              <v-col cols="12" sm="3">
-                <v-label class="font-weight-medium mb-2">Phone</v-label>
-                <v-text-field
-                  class="bg-blue-grey-lighten-5"
-                  
-                  v-model="account.phone"
-                  color="primary"
-                  variant="outlined"
-                  density="compact"
-                  type="text"
-                  placeholder="John Deo"
-                  hide-details
-              /></v-col>
+                />
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12" sm="5">
+                <v-label class="font-weight-medium mb-2">身份证号</v-label>
+                  <v-text-field
+                    v-model="formattedIdCard"
+                    @focus="onIdCardFocus"
+                    @blur="onIdCardBlur"
+                    color="primary"
+                    variant="outlined"
+                    density="compact"
+                    type="text"
+                    placeholder="请输入18位身份证号"
+                    :maxlength="18"
+                    @input="e => formattedIdCard = e.replace(/[^\d]/g, '')"
+                  />
+              </v-col>
             </v-row>
           </v-card-text>
           <v-divider></v-divider>
           <v-card-actions class="pa-5">
             <v-spacer></v-spacer>
-
             <v-btn
               class="px-5"
               color="primary"
@@ -241,18 +316,17 @@ Basic with Icons
               variant="elevated"
               @click="navigateToRent"
             >
-              Check Rent</v-btn
-            >
-
-
+              我的房源
+            </v-btn>
             <v-btn
               class="px-5"
               color="primary"
               elevation="1"
               variant="elevated"
+              @click="updateUserInfo"
             >
-              Unpdate Basic Info</v-btn
-            >
+              基本信息修改
+            </v-btn>
           </v-card-actions>
         </v-card>
 
@@ -261,14 +335,13 @@ Basic with Icons
         <!-- ---------------------------------------------- -->
         <v-card class="mb-5">
           <v-card-title class="py-4 font-weight-bold">
-            Authentication</v-card-title
-          >
+            Authentication
+          </v-card-title>
           <v-divider></v-divider>
           <v-card-text class="pa-7">
             <v-row>
               <v-col cols="12" md="6">
                 <v-btn
-                 
                   size="large"
                   block
                   variant="outlined"
@@ -277,34 +350,31 @@ Basic with Icons
                   <Icon
                     icon="logos:google-icon"
                     class="mr-3 my-2"
-                  />Google</v-btn
-                >
+                  />Google
+                </v-btn>
               </v-col>
-
               <v-col cols="12" md="6">
                 <v-btn size="large" block variant="outlined" disabled>
                   <Icon
                     icon="logos:facebook"
                     class="mr-3 my-2"
-                  />Facebook</v-btn
-                >
+                  />Facebook
+                </v-btn>
               </v-col>
-
               <v-col cols="12" md="6">
                 <v-btn size="large" block variant="elevated"
-                 color="primary"
-                  
+                  color="primary"
                 >
                   <Icon
                     icon="logos:github-icon"
                     class="mr-3 my-2"
-                  />Github</v-btn
-                >
+                  />Github
+                </v-btn>
               </v-col>
               <v-col cols="12" md="6">
                 <v-btn size="large" block variant="outlined" disabled>
-                  <Icon icon="logos:twitter" class="mr-3 my-2" />Twitter</v-btn
-                >
+                  <Icon icon="logos:twitter" class="mr-3 my-2" />Twitter
+                </v-btn>
               </v-col>
             </v-row>
           </v-card-text>
@@ -315,15 +385,13 @@ Basic with Icons
         <!-- ---------------------------------------------- -->
         <v-card class="mb-5">
           <v-card-title class="py-4 font-weight-bold">
-            Change Password
+            修改密码
           </v-card-title>
           <v-divider></v-divider>
           <v-card-text class="pa-7">
             <v-row>
               <v-col cols="12" sm="6">
-                <v-label class="font-weight-medium mb-2"
-                  >Current Password</v-label
-                >
+                <v-label class="font-weight-medium mb-2">当前密码</v-label>
                 <v-text-field
                   readonly
                   v-model="signon.password"
@@ -340,12 +408,11 @@ Basic with Icons
                   @click:append-inner="
                     currentPasswordShow = !currentPasswordShow
                   "
-                >
-                </v-text-field>
+                />
               </v-col>
               <v-col cols="12" sm="6"> </v-col>
               <v-col cols="12" sm="6">
-                <v-label class="font-weight-medium mb-2">Password</v-label>
+                <v-label class="font-weight-medium mb-2">新密码</v-label>
                 <v-text-field
                   v-model="newpassword"
                   density="compact"
@@ -358,13 +425,11 @@ Basic with Icons
                     newPasswordShow ? 'mdi-eye' : 'mdi-eye-off'
                   "
                   @click:append-inner="newPasswordShow = !newPasswordShow"
-                >
-                </v-text-field>
+                  @input="checkPasswordMatch"
+                />
               </v-col>
               <v-col cols="12" sm="6">
-                <v-label class="font-weight-medium mb-2"
-                  >Confirm Password</v-label
-                >
+                <v-label class="font-weight-medium mb-2">再次输入密码</v-label>
                 <v-text-field
                   v-model="confirmPassword"
                   density="compact"
@@ -379,9 +444,17 @@ Basic with Icons
                   @click:append-inner="
                     confirmPasswordShow = !confirmPasswordShow
                   "
+                  @input="checkPasswordMatch"
+                />
+                <v-alert
+                  v-if="showPasswordMismatch"
+                  type="error"
+                  density="compact"
+                  class="mt-2"
                 >
-                </v-text-field
-              ></v-col>
+                  两次输入的密码不一致
+                </v-alert>
+              </v-col>
             </v-row>
           </v-card-text>
           <v-divider></v-divider>
@@ -392,9 +465,11 @@ Basic with Icons
               color="primary"
               elevation="1"
               variant="elevated"
+              @click="updatePassword"
+              :disabled="showPasswordMismatch"
             >
-              Unpdate Password</v-btn
-            >
+              修改密码
+            </v-btn>
           </v-card-actions>
         </v-card>
 
@@ -403,8 +478,8 @@ Basic with Icons
         <!-- ---------------------------------------------- -->
         <v-card class="mb-5">
           <v-card-title class="py-4 font-weight-bold">
-            Notifications</v-card-title
-          >
+            申请成为房东
+          </v-card-title>
           <v-divider></v-divider>
           <v-card-text class="pa-7">
             <div>
@@ -413,8 +488,8 @@ Basic with Icons
                 color="primary"
                 class="mr-4"
                 hide-details
-                label=" Receive newsletters, promotions and news from lux"
-              ></v-switch>
+                label=" 马上改"
+              />
             </div>
             <div>
               <v-switch
@@ -422,8 +497,8 @@ Basic with Icons
                 color="primary"
                 class="mr-4"
                 hide-details
-                label=" Notify me when someone I follow uploads new workx"
-              ></v-switch>
+                label=" 还没改"
+              />
             </div>
           </v-card-text>
           <v-divider></v-divider>
@@ -435,8 +510,8 @@ Basic with Icons
               elevation="1"
               variant="elevated"
             >
-              Unpdate Notifications</v-btn
-            >
+             发送申请
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
