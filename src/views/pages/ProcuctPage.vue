@@ -10,7 +10,7 @@ import HouseFacilities from "~/src/components/houseDetail/HouseFacilities.vue";
 import Map from "~/src/components/HouseDetail/Map.vue";
 import { onMounted } from "vue";
 const route = useRoute();
-const id = route.params.id;
+const id = route.params.id||"1";
 
 const detail = ref({ 
   created_at: "2025-05-22T21:32:16",
@@ -69,10 +69,30 @@ const fetchHouseDetail = async () => {
     console.error("获取数据失败:", error);
   }
 };
+
+
+const fetchRecommendedHouse = async () => {
+  try {
+    const response = await axios.post(
+      `http://127.0.0.1:5000/houseinfo/views`,
+      { houseid: id }, // POST 请求体数据
+      {
+        headers: {
+          'Content-Type': 'application/json' // 确保设置正确的 Content-Type
+        }
+      }
+    );
+    console.log("浏览次数++:", response.data);
+    // 这里可以处理返回的热门推荐数据
+  } catch (error) {
+    console.error("获取热门推荐失败:", error);
+  }
+};
 onMounted(() => {
   console.log("Dashboard mounted");
   fetchHouce();
   fetchHouseDetail();
+  fetchRecommendedHouse(); // 新增调用
   console.log("House data:", house.value);
   console.log("House detail data:", detail.value);
 });

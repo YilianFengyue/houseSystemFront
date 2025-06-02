@@ -118,14 +118,19 @@ export const useAuthStore = defineStore("auth", {
             } else {
               console.error("获取用户信息失败：", profileRes.data.message);
             }
-           router.push("/dashboard");
+           //router.push("/dashboard");
+           window.location.href = "/dashboard";//转变跳转方式解决登录bug
         } else {
+          
           const snackbarStore = useSnackbarStore();
           snackbarStore.showErrorMessage("密码错误！");
           console.error("登录失败：", response.data.message);
+          throw new Error(response.data.message || "登录失败，密码或用户名错误");//抛出错误，显示错误信息
         }
       } catch (error: any) {
+        const errorMsg = error?.response?.data?.message || error.message;
         console.error("请求异常：", error?.response?.data?.message || error.message);
+         throw new Error(errorMsg); // 新增这行
       }
     },
     loginWithEmailAndPassword(email: string, password: string) {
