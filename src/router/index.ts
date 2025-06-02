@@ -204,6 +204,14 @@ export const routes = [
       },
       component: () => import("@/views/pages/AccountRentHouse.vue"),
     },
+    {
+      path: "/setpassword",
+      meta: {
+        requiresAuth: true,
+        layout: "landing",
+      },
+      component: () => import("@/views/pages/ResetPassword.vue"),
+    },
 
   ...LandingRoutes,
   ...AuthRoutes,

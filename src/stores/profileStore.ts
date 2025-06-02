@@ -42,7 +42,7 @@ export const useProfileStore = defineStore({
     },
     signon:{
       username:"Ylfmoonn",
-      password:"sfm12345",
+      password:"******",
       githubUuid:"181093978",
       avatarUrl:"https://avatars.githubusercontent.com/u/181093978?v=4",
     },
