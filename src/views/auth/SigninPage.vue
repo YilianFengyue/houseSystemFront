@@ -75,29 +75,25 @@ const signInWithGithub = async () => {
   // 确保使用一致的域名（全部用127.0.0.1或全部用localhost）
   const backendUrl = 'http://127.0.0.1:5000';
   const returnTo = encodeURIComponent(window.location.href);
-  window.location.href = `${backendUrl}/github/github_login?next=${returnTo}`;
+  window.location.href = `${backendUrl}/github/login?next=${returnTo}`;
 
 };
 
-const checkForToken = () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const token = urlParams.get('token');
-  
-  if (token) {
-    // 更安全的token存储方式
-    sessionStorage.setItem('authToken', token); // 改为sessionStorage
-    
-    // 更安全的URL清理
-    const cleanUrl = window.location.pathname;
-    window.history.replaceState({}, '', cleanUrl);
-    
-    // 使用更优雅的方式进行页面跳转
-    window.location.href = '/dashboard';
-  }
+// 页面加载时检查是否 GitHub 回调带 token--LU
+const checkForToken = async () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('token');
+  console.log('token', token);
+  if (token) {
+    await authStore.handleGithubCallback(token); // ✅ 替代手动写 sessionStorage 和跳转
+    // 清除 URL 参数
+    const cleanUrl = window.location.pathname;
+    window.history.replaceState({}, '', cleanUrl);
+    // 跳转到 dashboard
+    window.location.href = '/profile';
+  }
 };
-
-// 页面加载时执行检查
-checkForToken();
+checkForToken(); // 加载时执行
 
 // Error Check
 const emailRules = ref([
