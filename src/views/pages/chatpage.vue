@@ -9,7 +9,7 @@
               'user-message': message.sender_username === currentUser,
               'other-message': message.sender_username !== currentUser
             }">
-              <v-avatar class="ml-4" rounded="sm" variant="elevated">
+              <v-avatar class="ml-4 mr-3" rounded="sm" variant="elevated">
                 <img :src="message.sender_username === currentUser 
                   ? 'https://images.unsplash.com/photo-1494526585095-c41746248156' 
                   : 'https://images.unsplash.com/photo-1494526585095-c41746248156'" 

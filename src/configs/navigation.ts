@@ -35,9 +35,19 @@ export default {
           icon: "mdi-home-outline",
         },
         {
+          text: "房源上传",
+          link: "/landlordUpload",
+          icon: "mdi-home-outline",
+        },
+        {
           text: "新闻管理",
           link: "/news",
           icon: "mdi-newspaper",
+        },
+        {
+          text: "新闻编辑",
+          link: "/newsEditor",
+          icon: "mdi-file-document-edit-outline",
         },
         {
           text: "测试页面",

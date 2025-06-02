@@ -66,6 +66,26 @@ export const routes = [
     },
     component: () => import("@/views/pages/Admin/AdministratorPanel.vue"),
   },
+  //富文本编辑器
+  {
+    path: "/newsEditor",
+    component: () => import("@/views/pages/News/editor/RichTextEditorPage.vue"),
+    meta: {
+      requiresAuth: true,
+      layout: "landing",
+      category: "Data",
+      title: "RichTextEditor",
+    },
+  },
+  //房东发布房源界面：
+  {
+    path: "/landlordUpload",
+    meta: {
+      requiresAuth: true,
+      layout: "landing",
+    },
+    component: () => import("@/views/pages/landlord/uploadHousePage.vue"),
+  },
   {
     path: "/house/:id",
     meta: {
