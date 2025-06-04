@@ -162,5 +162,40 @@ export const useAuthStore = defineStore("auth", {
     logout() {
       router.push({ name: "auth-signin" });
     },
+
+    //修改：第三方登录--LULin
+    async handleGithubCallback(token: string) {
+  try {
+    // 1. 存储 token
+    const tokenStore = userTokenStore();
+    tokenStore.setToken(token);
+    
+    // 2. 获取用户信息
+    const res = await axios.get('http://127.0.0.1:5000/user/userinfo', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (res.data.code === 200) {
+      // 3. 更新 authStore 状态
+      this.setLoggedIn(true);
+      this.user = res.data.data;
+      
+      // 4. 更新 profileStore
+      const profileStore = useProfileStore();
+      profileStore.setUser(res.data.data);
+      
+      // 5. 重定向到主页
+      window.location.href = "/dashboard";
+    } else {
+      console.error('获取用户信息失败:', res.data.message);
+      throw new Error(res.data.message);
+    }
+  } catch (err) {
+    console.error('GitHub 登录处理失败:', err);
+    throw err;
+  }
+}
   },
 });
