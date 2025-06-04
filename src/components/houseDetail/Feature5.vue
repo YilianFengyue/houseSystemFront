@@ -142,7 +142,7 @@ onMounted(() => {
 
 <template>
   <div class="message-board">
-    <v-container>
+    <v-container fluid>
       <v-row justify="center">
         <v-col cols="12" md="12">
           <!-- 加载状态 -->

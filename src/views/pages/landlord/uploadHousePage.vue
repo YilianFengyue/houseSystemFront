@@ -1,9 +1,25 @@
 <script setup lang="ts">
-import { ref, computed } from "vue"; // computed 可能不再需要，除非有其他计算属性
+import { ref, computed,onMounted } from "vue"; // computed 可能不再需要，除非有其他计算属性
 import moment from "moment";
 import { formatFileSize } from "@/utils/common";
 import AnimationUpload from "./SDComponents/AnimationUpload.vue";
 import axios from "axios";
+
+// 解决 window.grecaptcha 类型报错
+declare global {
+  interface Window {
+    grecaptcha?: {
+      getResponse: () => string;
+      reset?: () => void;
+      render?: (...args: any[]) => any;
+      [key: string]: any;
+    };
+  }
+}
+
+//谷歌验证码
+const recaptchaSiteKey = '6LfRXlMrAAAAAIjs0Ln_JceX4X9l3DfVM5CNvjop' // 替换为你的 site key
+
 //房东信息
 import { useProfileStore } from "~/src/stores/profileStore";
 const profileStore = useProfileStore();
@@ -217,6 +233,12 @@ const updateSelectedKeysFromFacilities = () => {
 };
 onMounted(() => {
   updateSelectedKeysFromFacilities();
+  const script = document.createElement('script')
+  script.src = 'https://www.google.com/recaptcha/api.js'
+  script.async = true
+  script.defer = true
+  document.head.appendChild(script)
+
 });
 watch(() => house_detail.value.facilities, () => {
   updateSelectedKeysFromFacilities();
@@ -229,11 +251,15 @@ watch(() => house_detail.value.facilities, () => {
 //   console.log("上传房东信息：", user);
 //   console.log("房屋详情", house_detail.value);
 //   console.log("所有原始文件：", allRawFiles.value);
-  
 // };
 // --- 上传和提交函数 ---
 const isSubmitting = ref(false); // 用于控制提交状态
 const uploadNewHouse = async () => {
+  const response = window.grecaptcha?.getResponse()
+  if (!response) {
+    snackbarStore.showErrorMessage(`请先完成验证`);
+    return
+  }
   isSubmitting.value = true;
   console.log("开始上传流程...");
   console.log("所有原始待上传文件：", allRawFiles.value.map(f => f.name));
@@ -580,7 +606,12 @@ const uploadNewHouse = async () => {
 </v-row>
           </v-card-text>
           <v-divider></v-divider>
+          
+          
           <v-card-actions class="pa-5">
+            <div style="max-width: 304px">
+            <div class="g-recaptcha   " :data-sitekey="recaptchaSiteKey"></div>
+            </div>
             <v-spacer></v-spacer>
             <v-btn
               class="px-5"
@@ -588,6 +619,7 @@ const uploadNewHouse = async () => {
               color="primary"
               elevation="1"
               variant="elevated"
+              size="x-large"
             >
               上传房源！</v-btn
             >

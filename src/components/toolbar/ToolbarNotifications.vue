@@ -137,8 +137,8 @@ const closeMenu = () => {
       </v-btn>
     </template>
     
-    <v-list elevation="1" lines="three" density="compact" max-width="400">
-      <v-list-subheader>Notifications</v-list-subheader>
+    <v-list elevation="1" lines="three" density="compact" width="400">
+      <v-list-subheader class="font-weight-bold pl-2" >消息列表</v-list-subheader>
       
       <template v-if="loading">
         <v-list-item>
@@ -154,7 +154,7 @@ const closeMenu = () => {
       
       <template v-else-if="messages.length === 0">
         <v-list-item>
-          <v-list-item-title>暂无消息</v-list-item-title>
+          <v-list-item-title class="font-weight-bold pl-2 d-flex justify-center">暂无消息</v-list-item-title>
         </v-list-item>
       </template>
       
@@ -191,12 +191,13 @@ const closeMenu = () => {
       <!-- Close Btn -->
       <div class="text-center py-5">
         <v-btn 
-          size="small" 
-          variant="elevated" 
-          elevation="1"
+          prepend-icon="mdi-close"
+          variant="outlined"
+          elevation="4"
           @click="closeMenu"
+          color="red-darken-4"
         >
-          Close
+          关闭
         </v-btn>
       </div>
     </v-list>

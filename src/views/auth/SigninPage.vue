@@ -1,3 +1,4 @@
+
 <script setup lang="ts">
 import { Icon } from "@iconify/vue";
 import { useAuthStore } from "@/stores/authStore";
@@ -17,12 +18,15 @@ const email = ref("vuetify3-visitor@gmail.com");
 const password = ref("123456");
 const isFormValid = ref(true);
 
+
+//Google
 // show password field
 const showPassword = ref(false);
 
 import { nextTick } from 'vue';
 const handleLogin = async () => {
   const { valid } = await refLoginForm.value.validate();
+
   if (valid) {
     isLoading.value = true;
     isSignInDisabled.value = true;
@@ -57,26 +61,9 @@ const signInWithGoolgle = () => {
   authStore.loginWithGoogle();
 };
 const signInWithGithub = async () => {
-  //authStore.loginWithGithub();//这一行为原有的
-  //  try {
-  //   // 调用后端 GitHub 登录接口
-  //   const response = await axios.get('http://127.0.0.1:5000/github/github_login');
-  //   // 根据后端返回的结果处理
-  //   if (response.data.redirect_url) {
-  //     // 通常后端会返回 GitHub 授权页面的重定向 URL
-  //     window.location.href = response.data.redirect_url;
-  //   } else {
-  //     console.error('GitHub 登录接口未返回重定向 URL:', response.data);
-  //   }
-  // } catch (error) {
-  //   console.error('GitHub 登录失败:', error);
-  //   // 可以在这里添加错误提示（如使用 Toast 组件）
-  // }
-  // 确保使用一致的域名（全部用127.0.0.1或全部用localhost）
   const backendUrl = 'http://127.0.0.1:5000';
   const returnTo = encodeURIComponent(window.location.href);
   window.location.href = `${backendUrl}/github/github_login?next=${returnTo}`;
-
 };
 
 const checkForToken = () => {
@@ -211,10 +198,10 @@ const resetPassword = () => {
           size="x-large"
           color="primary"
           @click="handleLogin"
-          class="mt-2"
-          >{{ $t("login.button") }}</v-btn
+          class="mt-2 font-weight-bold "
+          >登录</v-btn
         >
-
+      
         <div
           class="text-grey text-center text-caption font-weight-bold text-uppercase my-5"
         >

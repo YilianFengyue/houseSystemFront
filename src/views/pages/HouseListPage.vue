@@ -2,8 +2,8 @@
 <div class="pa-5">
   <v-container fluid class="pa-0">
     <v-card class="mb-5 pa-4" flat outlined>
-      <v-card-title class="text-h6 font-weight-medium pl-0">
-        查找房源
+      <v-card-title class="text-h5 font-weight-bold pl-0">
+        智能搜索
       </v-card-title>
       <v-row align="center" dense>
         <v-col cols="12">
@@ -92,7 +92,7 @@
             class="mr-2"
             style="max-width: 100px;"
           ></v-text-field>
-          <v-btn size="small" color="primary" variant="outlined" @click="applyCustomPriceRange" class="mt-2 mt-md-0">确定</v-btn>
+          <v-btn  color="primary" variant="outlined" @click="applyCustomPriceRange" class="mt-2 mt-md-0">确定</v-btn>
         </v-col>
       </v-row>
 

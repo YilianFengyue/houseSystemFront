@@ -110,7 +110,7 @@ onMounted(() => {
       <v-col cols="12" xl="4">
           <Map :address="`湖南省长沙市${house.region}${house.block}${house.community}`" />
       </v-col>
-      <v-col cols="12" xl="12">
+      <v-col cols="12" md="12">
         <Feature5 :houseId="id"/>
       </v-col>
     </v-row>
