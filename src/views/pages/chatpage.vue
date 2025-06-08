@@ -19,7 +19,7 @@
                 <v-card-title class="text-caption">
                   {{ message.sender_username }}
                   <span class="text-caption text-grey ml-2">
-                    {{ new Date(message.timestamp).toLocaleTimeString() }}
+                    {{ new Date(message.timestamp).toISOString().substr(11, 8) }}
                   </span>
                 </v-card-title>
                 <v-card-text>
