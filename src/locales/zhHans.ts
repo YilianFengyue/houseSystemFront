@@ -21,6 +21,7 @@ export default {
     create: "在此处创建一个",
     error: "电子邮件/密码组合无效",
   },
+  Phone: "手机号",
   register: {
     title: "创建帐号",
     username: "全名",
