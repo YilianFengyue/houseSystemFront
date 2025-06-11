@@ -43,9 +43,7 @@ const passwordRules = ref([
     (v && v.length <= 10) || "Password must be less than 10 characters",
 ]);
 
-// error provider
-const errorProvider = ref(false);
-const errorProviderMessages = ref("");
+
 
 const error = ref(false);
 const errorMessages = ref("");
@@ -135,38 +133,7 @@ const resetErrors = () => {
           >{{ $t("register.button") }}</v-btn
         >
 
-        <div
-          class="text-grey text-center text-caption font-weight-bold text-uppercase my-5"
-        >
-          {{ $t("register.orsign") }}
-        </div>
 
-        <!-- external providers list -->
-        <v-btn
-          class="mb-2 lighten-2 text-capitalize"
-          block
-          size="x-large"
-          color="white"
-          @click="authStore.loginWithGithub()"
-          :disabled="isSignInDisabled"
-        >
-          <Icon icon="logos:github-icon" class="mr-3 my-2" />
-          Github
-        </v-btn>
-        <v-btn
-          class="mb-2 lighten-2 text-capitalize"
-          block
-          color="white"
-          size="x-large"
-          :disabled="isSignInDisabled"
-        >
-          <Icon icon="logos:facebook" class="mr-3" />
-          Facebook
-        </v-btn>
-
-        <div v-if="errorProvider" class="error--text my-5">
-          {{ errorProviderMessages }}
-        </div>
 
         <div class="my-5 text-center">
           {{ $t("register.agree") }}

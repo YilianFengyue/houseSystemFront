@@ -131,14 +131,7 @@ export const routes = [
       // title: "ImageBot",
     },
   },
-  {
-    path: '/oauth/callback',
-    meta: {
-      requiresAuth: true,
-      layout: "landing",
-    },
-    component: () => import('@/views/auth/OauthCallBack.vue'),
-  },
+
   {
     path: "/profile",
     name: "profile",

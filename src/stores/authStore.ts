@@ -137,65 +137,8 @@ export const useAuthStore = defineStore("auth", {
       router.push("/");
     },
 
-    loginWithGoogle() {
-      router.push("/");
-    },
-    async loginWithGithub() {
-      // try {
-      //   const response = await axios.post(
-      //     "http://localhost:81/oauth/render",
-      //   );
-      //   if (response.data.code === 20011) {
-      //     this.setLoggedIn(true);
-      //     this.user = response.data.data;
-      //     router.push("/");
-      //   } else {
-      //     console.error("登录失败：", response.data.message);
-      //   }
-      // } catch (error: any) {
-      //   console.error("请求异常：", error?.response?.data?.message || error.message);
-      // }
-      window.location.href = "/sdApi/oauth/render";
-      // router.push("/");
-    },
-
     logout() {
       router.push({ name: "auth-signin" });
-    },
-
-    //修改：第三方登录--LULin
-    async handleGithubCallback(token: string) {
-  try {
-    // 1. 存储 token
-    const tokenStore = userTokenStore();
-    tokenStore.setToken(token);
-    
-    // 2. 获取用户信息
-    const res = await axios.get('http://127.0.0.1:5000/user/userinfo', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-
-    if (res.data.code === 200) {
-      // 3. 更新 authStore 状态
-      this.setLoggedIn(true);
-      this.user = res.data.data;
-      
-      // 4. 更新 profileStore
-      const profileStore = useProfileStore();
-      profileStore.setUser(res.data.data);
-      
-      // 5. 重定向到主页
-      window.location.href = "/dashboard";
-    } else {
-      console.error('获取用户信息失败:', res.data.message);
-      throw new Error(res.data.message);
     }
-  } catch (err) {
-    console.error('GitHub 登录处理失败:', err);
-    throw err;
-  }
-}
   },
 });

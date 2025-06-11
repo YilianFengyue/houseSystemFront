@@ -57,31 +57,7 @@ const handleLogin = async () => {
   }
 };
 
-const signInWithGoolgle = () => {
-  authStore.loginWithGoogle();
-};
-const signInWithGithub = async () => {
-  const backendUrl = 'http://127.0.0.1:5000';
-  const returnTo = encodeURIComponent(window.location.href);
-  window.location.href = `${backendUrl}/github/login?next=${returnTo}`;
 
-};
-
-// 页面加载时检查是否 GitHub 回调带 token--LU
-const checkForToken = async () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const token = urlParams.get('token');
-  console.log('token', token);
-  if (token) {
-    await authStore.handleGithubCallback(token); // ✅ 替代手动写 sessionStorage 和跳转
-    // 清除 URL 参数
-    const cleanUrl = window.location.pathname;
-    window.history.replaceState({}, '', cleanUrl);
-    // 跳转到 dashboard
-    window.location.href = '/profile';
-  }
-};
-checkForToken(); // 加载时执行
 
 // Error Check
 const emailRules = ref([
@@ -97,9 +73,7 @@ const passwordRules = ref([
     (v && v.length <= 10) || "Password must be less than 10 characters",
 ]);
 
-// error provider
-const errorProvider = ref(false);
-const errorProviderMessages = ref("");
+
 
 const error = ref(false);
 const errorMessages = ref("");
@@ -108,9 +82,7 @@ const resetErrors = () => {
   errorMessages.value = "";
 };
 
-const signInWithFacebook = () => {
-  alert(authStore.isLoggedIn);
-};
+
 
 const resetPassword = () => {
   // 重置密码
@@ -199,41 +171,7 @@ const resetPassword = () => {
           >登录</v-btn
         >
       
-        <div
-          class="text-grey text-center text-caption font-weight-bold text-uppercase my-5"
-        >
-          {{ $t("login.orsign") }}
-        </div>
 
-        <!-- external providers list -->
-        <v-btn
-          class="mb-2 text-capitalize"
-          color="white"
-          elevation="1"
-          block
-          size="x-large"
-          @click="signInWithGithub"
-          :disabled="isSignInDisabled"
-        >
-          <Icon icon="logos:github-icon" class="mr-3 my-2" />
-          Github
-        </v-btn>
-        <v-btn
-          class="mb-2 lighten-2 text-capitalize"
-          elevation="1"
-          color="white"
-          block
-          size="x-large"
-          :disabled="isSignInDisabled"
-          @click="signInWithFacebook"
-        >
-          <Icon icon="logos:facebook" class="mr-3" />
-          Facebook
-        </v-btn>
-
-        <div v-if="errorProvider" class="error--text my-2">
-          {{ errorProviderMessages }}
-        </div>
 
         <div class="mt-5 text-center">
           <router-link class="text-primary" to="/auth/forgot-password" @click="resetPassword">

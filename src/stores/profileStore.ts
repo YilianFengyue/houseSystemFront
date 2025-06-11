@@ -46,10 +46,7 @@ export const useProfileStore = defineStore({
       githubUuid:"181093978",
       avatarUrl:"https://avatars.githubusercontent.com/u/181093978?v=4",
     },
-    authorized: {
-      google: false,
-      facebook: false,
-    },
+
     notifications: {
       officialEmails: true,
       followerUpdates: true,
@@ -72,7 +69,6 @@ export const useProfileStore = defineStore({
     getProfile() {
       return {
         basic: this.basic,
-        authorized: this.authorized,
         notifications: this.notifications,
         user: this.user,
       };
@@ -115,10 +111,7 @@ export const useProfileStore = defineStore({
     updateBasicInfo(info) {
       this.basic = { ...this.basic, ...info };
     },
-    // update Authorized
-    updateAuthorizedStatus(service, status) {
-      this.authorized[service] = status;
-    },
+
     // Update Notifications
     updateNotificationSettings(settings) {
       this.notifications = { ...this.notifications, ...settings };
