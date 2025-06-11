@@ -177,6 +177,98 @@ const updateUserInfo = async () => {
     snackbar.show = true;
   }
 };
+
+const userType = ref(profileStore.user.userType);
+
+
+//邮箱部分
+// 邮箱验证
+//用于申请房东身份
+// 邮箱验证码相关状态
+const emailVerificationCode = ref('');
+const isSendingCode = ref(false);
+const countdown = ref(60);
+const verificationError = ref('');
+const isSubmitting = ref(false);
+
+// 发送邮箱验证码
+const sendEmailVerificationCode = async () => {
+  if (!user.email) {
+    verificationError.value = '邮箱地址不能为空';
+    return;
+  }
+  
+  try {
+    isSendingCode.value = true;
+    verificationError.value = '';
+    
+    // 调用API发送邮箱验证码
+    const response = await axios.post('http://localhost:5000/user/userinfo/tolanlord', {
+      email: user.email,
+      //type: 'landlord_application' // 可以指定验证码类型
+    });
+    
+    if (response.data.code === 200) {
+      // 开始倒计时
+      const timer = setInterval(() => {
+        countdown.value--;
+        if (countdown.value <= 0) {
+          clearInterval(timer);
+          isSendingCode.value = false;
+          countdown.value = 60;
+        }
+      }, 1000);
+      
+      snackbar.color = 'success';
+      snackbar.message = '验证码已发送至您的邮箱，请查收';
+      snackbar.show = true;
+    } else {
+      verificationError.value = response.data.message || '验证码发送失败';
+      isSendingCode.value = false;
+    }
+  } catch (error) {
+    console.error('发送邮箱验证码出错:', error);
+    verificationError.value = '服务器错误，请稍后再试';
+    isSendingCode.value = false;
+  }
+};
+
+// 提交房东申请
+const submitLandlordApplication = async () => {
+  if (!emailVerificationCode.value) {
+    verificationError.value = '请输入邮箱验证码';
+    return;
+  }
+  
+  try {
+    isSubmitting.value = true;
+    verificationError.value = '';
+    
+    const response = await axios.put('http://localhost:5000/user/userinfo/usertype', {
+      //userId: profileStore.getUserId(),
+      email: user.email,
+      //code: emailVerificationCode.value
+    });
+    
+    if (response.data.code === 200) {
+      snackbar.color = 'success';
+      snackbar.message = '申请已提交，请重新登陆以获取状态';
+      snackbar.show = true;
+      // 更新用户类型状态
+      userType.value = 2; // 假设2表示已申请待审核状态
+    } else {
+      verificationError.value = response.data.message || '申请提交失败';
+    }
+  } catch (error) {
+    console.error('提交申请出错:', error);
+    verificationError.value = '服务器错误，请稍后再试';
+  } finally {
+    isSubmitting.value = false;
+  }
+};
+
+
+
 </script>
 
 <template>
@@ -476,44 +568,83 @@ const updateUserInfo = async () => {
         <!-- ---------------------------------------------- -->
         <!--   Notifications  -->
         <!-- ---------------------------------------------- -->
-        <v-card class="mb-5">
-          <v-card-title class="py-4 font-weight-bold">
-            申请成为房东
-          </v-card-title>
-          <v-divider></v-divider>
-          <v-card-text class="pa-7">
-            <div>
-              <v-switch
-                v-model="notifications.officialEmails"
-                color="primary"
-                class="mr-4"
-                hide-details
-                label=" 马上改"
-              />
-            </div>
-            <div>
-              <v-switch
-                v-model="notifications.followerUpdates"
-                color="primary"
-                class="mr-4"
-                hide-details
-                label=" 还没改"
-              />
-            </div>
-          </v-card-text>
-          <v-divider></v-divider>
-          <v-card-actions class="pa-5">
-            <v-spacer></v-spacer>
-            <v-btn
-              class="px-5"
-              color="primary"
-              elevation="1"
-              variant="elevated"
-            >
-             发送申请
-            </v-btn>
-          </v-card-actions>
-        </v-card>
+        
+        <v-card class="mb-5" v-if="userType === 1">
+  <v-card-title class="py-4 font-weight-bold">
+    申请成为房东
+  </v-card-title>
+  <v-divider></v-divider>
+  <v-card-text class="pa-7">
+    <v-row>
+      <v-col cols="12" sm="8">
+        <v-label class="font-weight-medium mb-2">邮箱地址</v-label>
+        <v-text-field
+          v-model="user.email"
+          color="primary"
+          variant="outlined"
+          density="compact"
+          type="email"
+          placeholder="请输入您的邮箱"
+          hide-details
+          readonly
+        />
+      </v-col>
+      <v-col cols="12" sm="4" class="d-flex align-end">
+        <v-btn
+          color="primary"
+          variant="elevated"
+          :disabled="isSendingCode"
+          @click="sendEmailVerificationCode"
+        >
+          {{ isSendingCode ? `${countdown}秒后重试` : '获取验证码' }}
+        </v-btn>
+      </v-col>
+    </v-row>
+    <v-row class="mt-3">
+      <v-col cols="12" sm="8">
+        <v-label class="font-weight-medium mb-2">邮箱验证码</v-label>
+        <v-text-field
+          v-model="emailVerificationCode"
+          color="primary"
+          variant="outlined"
+          density="compact"
+          type="text"
+          placeholder="请输入邮箱验证码"
+          hide-details
+        />
+      </v-col>
+    </v-row>
+    <v-row class="mt-3">
+      <v-col cols="12">
+        <v-alert
+          v-if="verificationError"
+          type="error"
+          density="compact"
+          class="mt-2"
+        >
+          {{ verificationError }}
+        </v-alert>
+      </v-col>
+    </v-row>
+  </v-card-text>
+  <v-divider></v-divider>
+  <v-card-actions class="pa-5">
+    <v-spacer></v-spacer>
+    <v-btn
+      class="px-5"
+      color="primary"
+      elevation="1"
+      variant="elevated"
+      @click="submitLandlordApplication"
+      :disabled="!emailVerificationCode || isSubmitting"
+    >
+      {{ isSubmitting ? '提交中...' : '提交申请' }}
+    </v-btn>
+  </v-card-actions>
+</v-card>
+
+
+
       </v-col>
     </v-row>
   </v-sheet>
