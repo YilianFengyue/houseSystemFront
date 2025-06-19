@@ -191,7 +191,9 @@ const countdown = ref(60);
 const verificationError = ref('');
 const isSubmitting = ref(false);
 
-// 发送邮箱验证码
+// 在 data 部分添加
+const receivedVerificationCode = ref(''); // 存储从后端获取的验证码
+
 const sendEmailVerificationCode = async () => {
   if (!user.email) {
     verificationError.value = '邮箱地址不能为空';
@@ -202,13 +204,14 @@ const sendEmailVerificationCode = async () => {
     isSendingCode.value = true;
     verificationError.value = '';
     
-    // 调用API发送邮箱验证码
     const response = await axios.post('http://localhost:5000/user/userinfo/tolanlord', {
-      email: user.email,
-      //type: 'landlord_application' // 可以指定验证码类型
+      email: user.email
     });
     
     if (response.data.code === 200) {
+      // 保存验证码到 receivedVerificationCode
+      receivedVerificationCode.value = response.data.data;
+      
       // 开始倒计时
       const timer = setInterval(() => {
         countdown.value--;
@@ -240,22 +243,26 @@ const submitLandlordApplication = async () => {
     return;
   }
   
+  // 添加验证码比对
+  if (emailVerificationCode.value !== receivedVerificationCode.value) {
+    verificationError.value = '验证码不正确，请重新输入';
+    return;
+  }
+  
   try {
     isSubmitting.value = true;
     verificationError.value = '';
     
     const response = await axios.put('http://localhost:5000/user/userinfo/usertype', {
-      //userId: profileStore.getUserId(),
       email: user.email,
-      //code: emailVerificationCode.value
+      code: emailVerificationCode.value
     });
     
     if (response.data.code === 200) {
       snackbar.color = 'success';
       snackbar.message = '申请已提交，请重新登陆以获取状态';
       snackbar.show = true;
-      // 更新用户类型状态
-      userType.value = 2; // 假设2表示已申请待审核状态
+      userType.value = 2;
     } else {
       verificationError.value = response.data.message || '申请提交失败';
     }
@@ -267,6 +274,92 @@ const submitLandlordApplication = async () => {
   }
 };
 
+
+//下面进行用户头像上传-------------------------------
+//计划涉及云服务上传---------------------------------
+//本地图片------------------------------------------
+//获取连接------------------------------------------
+// 在现有导入基础上添加------------------------------
+
+const avatarFile = ref<File | null>(null);
+const isUploading = ref(false);
+const avatarInput = ref<HTMLInputElement | null>(null);
+
+const avatarRefreshKey = ref(0); // 用于强制刷新图片缓存
+
+// 定义默认头像URL（已调整到更靠前的位置）
+const DEFAULT_AVATAR = "http://localhost:5000/user/images/16_20250612121326.jpg";
+
+// 获取用户头像（修改了默认值设置逻辑）
+const loadUserAvatar = async () => {
+  try {
+    // 修改API路径与请求方式，使用GET并传递id参数
+    const response = await axios.get(
+      `http://localhost:5000/user/userinfo/avatar`,
+      { params: { id: profileStore.getUserId() } }
+    );
+    
+    if (response.data.code === 200) {
+      user.avatarUrl = response.data.data.avatarUrl;
+    } else {
+      console.error('获取头像失败:', response.data.message);
+      user.avatarUrl = DEFAULT_AVATAR; // 服务器返回错误时使用默认头像
+    }
+  } catch (error) {
+    console.error('加载头像失败:', error);
+    user.avatarUrl = DEFAULT_AVATAR; // 异常时使用默认头像
+  } finally {
+    avatarRefreshKey.value++; // 确保头像刷新
+  }
+};
+
+// 头像上传处理（新增默认头像回退逻辑）
+const handleAvatarUpload = async (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  if (input.files && input.files[0]) {
+    isUploading.value = true;
+    avatarFile.value = input.files[0];
+    
+    try {
+      // 1. 先预览新头像
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        user.avatarUrl = e.target?.result as string;
+      };
+      reader.readAsDataURL(avatarFile.value);
+      
+      // 2. 上传到服务器
+      const formData = new FormData();
+      formData.append('avatar', avatarFile.value);
+      formData.append('userId', profileStore.getUserId());
+
+      const response = await axios.post('http://localhost:5000/user/userinfo/avatarurl', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (response.data.code === 200) {
+        profileStore.updateAvatar(response.data.data.avatarUrl);
+        // 上传成功后刷新头像
+        loadUserAvatar();
+      } else {
+        // 上传失败时回退到默认头像
+        user.avatarUrl = DEFAULT_AVATAR;
+      }
+    } catch (error) {
+      console.error('上传失败:', error);
+      // 异常时回退到默认头像
+      user.avatarUrl = DEFAULT_AVATAR;
+    } finally {
+      isUploading.value = false;
+    }
+  }
+};
+// 触发文件选择
+const triggerFileInput = () => {
+  avatarInput.value?.click();
+};
 
 
 </script>
@@ -280,42 +373,70 @@ const submitLandlordApplication = async () => {
     </v-snackbar>
 
     <v-row>
-      <v-col cols="12" md="3">
-        <v-card>
-          <div class="d-flex flex-column pa-10">
-            <v-avatar size="120" class="mx-auto elevation-12" color="white">
-              <v-img :src="user.avatarUrl"> </v-img>
-            </v-avatar>
 
-            <div class="text-center mt-5">
-              <h3 class="text-h6 font-weight-bold">
-                {{user.name}}
-                <v-chip size="small" class="font-weight-bold" color="blue">
-                  User
-                </v-chip>
-              </h3>
-              <p class="text-body-2">Costumer of Petstore</p>
-            </div>
-          </div>
-          <v-divider></v-divider>
-          <div class="py-5 px-10">
-            <v-icon color="grey"> mdi-map-marker </v-icon>
-            <span class="ml-4">{{ account.city }}</span>
-          </div>
+    <v-col cols="12" md="3">
+  <v-card>
+    <div class="d-flex flex-column pa-10">
+        <!-- 头像显示（使用数据库中的URL） -->
+        <!-- 头像显示（优化默认值判断逻辑） -->
+      <v-avatar size="120" class="mx-auto elevation-12" color="white">
+        <v-img 
+          :src="user.avatarUrl || DEFAULT_AVATAR" 
+          :key="avatarRefreshKey" 
+        ></v-img>
+      </v-avatar>
+      
+      <!-- 上传按钮（始终显示） -->
+      <v-btn
+        class="mt-3"
+        color="primary"
+        :loading="isUploading"
+        @click="avatarInput?.click()"
+      >
+        更换头像
+      </v-btn>
+      
+      <!-- 隐藏的文件输入 -->
+      <input
+        ref="avatarInput"
+        type="file"
+        accept="image/*"
+        style="display: none"
+        @change="handleAvatarUpload"
+      />
 
-          <v-divider></v-divider>
-          <div class="py-5 px-10">
-            <v-icon color="grey"> mdi-email-check-outline </v-icon>
-            <span class="ml-4">{{user.email }}</span>
-          </div>
-          <v-divider></v-divider>
+      <div class="text-center mt-5">
+        <h3 class="text-h6 font-weight-bold">
+          {{user.name}}
+          <v-chip size="small" class="font-weight-bold" color="blue">
+            User
+          </v-chip>
+        </h3>
+        <p class="text-body-2">Costumer of Petstore</p>
+      </div>
+    </div>
 
-          <div class="py-5 px-10">
-            <v-icon color="grey"> mdi-phone-outline </v-icon>
-            <span class="ml-4">{{user.phone}}</span>
-          </div>
-        </v-card>
-      </v-col>
+    <v-divider></v-divider>
+    <div class="py-5 px-10">
+      <v-icon color="grey"> mdi-map-marker </v-icon>
+      <span class="ml-4">{{ account.city }}</span>
+    </div>
+
+    <v-divider></v-divider>
+    <div class="py-5 px-10">
+      <v-icon color="grey"> mdi-email-check-outline </v-icon>
+      <span class="ml-4">{{user.email }}</span>
+    </div>
+    
+    <v-divider></v-divider>
+    <div class="py-5 px-10">
+      <v-icon color="grey"> mdi-phone-outline </v-icon>
+      <span class="ml-4">{{user.phone}}</span>
+    </div>
+  </v-card>
+</v-col>
+
+
       <v-col cols="12" md="9">
         <!-- ---------------------------------------------- -->
         <!--   Basic Infomation -->
