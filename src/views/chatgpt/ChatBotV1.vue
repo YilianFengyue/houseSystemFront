@@ -8,7 +8,7 @@
 import * as live2d from 'live2d-render';
 //头像获取
 import { useProfileStore } from "@/stores/profileStore";
-import { onMounted } from 'vue';
+import { ref, reactive, computed, watch, onMounted } from 'vue';
 const profileStore = useProfileStore();
 const signon = reactive({ ...profileStore.signon });
 
@@ -136,9 +136,13 @@ watch(
       const last = val[val.length - 1];
       // 如果是 AI 回复
       if (last?.role === "assistant" && last.content) {
-        // 提取第一句话（或最多50个字）
-        const firstSentence = last.content.split(/(?<=[。！？\n.?!])\s*/)[0] || last.content.slice(0, 50);
-        live2d.setMessageBox(firstSentence, 4000);
+        try {
+          // 提取第一句话（或最多50个字）
+          const firstSentence = last.content.split(/(?<=[。！？\n.?!])\s*/)[0] || last.content.slice(0, 50);
+          live2d.setMessageBox(firstSentence, 4000);
+        } catch (error) {
+          console.warn('Live2D message display failed:', error);
+        }
       }
     }
   },
@@ -172,7 +176,14 @@ const handleKeydown = (e) => {
 
 const inputRow = ref(1);
 onMounted(() => {
-  live2d.setMessageBox("欢迎欢迎~有什么需要帮助的吗", 4000);
+  try {
+    // 添加延迟确保 DOM 完全渲染
+    setTimeout(() => {
+      live2d.setMessageBox("欢迎欢迎~有什么需要帮助的吗", 4000);
+    }, 1000);
+  } catch (error) {
+    console.warn('Live2D initialization failed:', error);
+  }
 });
 </script>
 

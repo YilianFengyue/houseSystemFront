@@ -3,29 +3,44 @@ import { Icon } from "@iconify/vue";
 import { useAuthStore } from "@/stores/authStore";
 import axios from "axios";
 import router from "~/src/router";
+import { nextTick, ref, onUnmounted } from 'vue';
+import { userTokenStore } from "@/stores/token";
+import { useProfileStore } from "@/stores/profileStore";
 
 const authStore = useAuthStore();
 const isLoading = ref(false);
 const isSignInDisabled = ref(false);
 const isSmsLoading = ref(false);
 const isSendingCode = ref(false);
+const isEmailCodeLoading = ref(false);
+const isSendingEmailCode = ref(false);
 
 // 登录方式切换
-const loginMethod = ref("password"); // "password" or "sms"
+const loginMethod = ref("password"); // "password", "sms", "email", or "email-code"
 
 // 表单引用
 const refPasswordForm = ref();
 const refSmsForm = ref();
+const refEmailForm = ref();
+const refEmailCodeForm = ref();
 
 // 表单数据
 const phone = ref("19511053624");
 const password = ref("123456");
 const smsCode = ref("");
+const email = ref("");
+const emailPassword = ref("");
+const emailForCode = ref("");
+const emailCode = ref("");
 const isFormValid = ref(true);
 
 // 短信验证码相关
 const countdown = ref(0);
-const countdownTimer = ref(null);
+const countdownTimer = ref<NodeJS.Timeout | null>(null);
+
+// 邮箱验证码相关
+const emailCountdown = ref(0);
+const emailCountdownTimer = ref<NodeJS.Timeout | null>(null);
 
 // 显示密码
 const showPassword = ref(false);
@@ -33,8 +48,6 @@ const showPassword = ref(false);
 // 错误处理
 const error = ref(false);
 const errorMessages = ref("");
-
-import { nextTick } from 'vue';
 
 // 密码登录
 const handlePasswordLogin = async () => {
@@ -171,8 +184,10 @@ const startCountdown = () => {
   countdownTimer.value = setInterval(() => {
     countdown.value--;
     if (countdown.value <= 0) {
-      clearInterval(countdownTimer.value);
-      countdownTimer.value = null;
+      if (countdownTimer.value) {
+        clearInterval(countdownTimer.value);
+        countdownTimer.value = null;
+      }
     }
   }, 1000);
 };
@@ -199,6 +214,175 @@ const smsCodeRules = ref([
   (v: string) => (v && v.length === 6) || "验证码必须是6位数字",
 ]);
 
+// 邮箱验证规则
+const emailRules = ref([
+  (v: string) => !!v || "邮箱不能为空",
+  (v: string) => {
+    const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return pattern.test(v) || "请输入正确的邮箱格式";
+  },
+]);
+
+const emailPasswordRules = ref([
+  (v: string) => !!v || "密码不能为空",
+  (v: string) => (v && v.length <= 20) || "密码长度不能超过20个字符",
+]);
+
+const emailCodeRules = ref([
+  (v: string) => !!v || "验证码不能为空",
+  (v: string) => (v && v.length === 6) || "验证码必须是6位数字",
+]);
+
+// 邮箱登录
+const handleEmailLogin = async () => {
+  const { valid } = await refEmailForm.value.validate();
+
+  if (valid) {
+    isLoading.value = true;
+    isSignInDisabled.value = true;
+    error.value = false;
+    errorMessages.value = "";
+
+    try {
+      await authStore.loginWithEmailAndPassword(email.value, emailPassword.value);
+    } catch (err) {
+      console.error("邮箱登录出错", err);
+      error.value = true;
+      errorMessages.value = "邮箱或密码错误";
+      await nextTick();
+      refEmailForm.value.$el.classList.add('shake');
+      setTimeout(() => {
+        refEmailForm.value.$el.classList.remove('shake');
+      }, 500);
+      return;
+    } finally {
+      isLoading.value = false;
+      isSignInDisabled.value = false;
+    }
+  }
+};
+
+// 发送邮箱验证码
+const sendEmailCode = async () => {
+  if (!emailForCode.value) {
+    error.value = true;
+    errorMessages.value = "请输入邮箱地址";
+    return;
+  }
+
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(emailForCode.value)) {
+    error.value = true;
+    errorMessages.value = "请输入正确的邮箱格式";
+    return;
+  }
+
+  if (emailCountdown.value > 0) {
+    return; // 防止重复发送
+  }
+
+  isSendingEmailCode.value = true;
+  error.value = false;
+  errorMessages.value = "";
+
+  try {
+    const response = await axios.post('http://localhost:5000/email-auth/send-code', {
+      email: emailForCode.value
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.data.code === 201) {
+      // 开始倒计时
+      startEmailCountdown();
+      // 显示成功消息
+      errorMessages.value = response.data.message;
+      error.value = false;
+    } else {
+      error.value = true;
+      errorMessages.value = response.data.message || "发送验证码失败";
+    }
+  } catch (err) {
+    console.error("发送邮箱验证码出错", err);
+    error.value = true;
+    errorMessages.value = err.response?.data?.message || "网络错误，发送失败";
+  } finally {
+    isSendingEmailCode.value = false;
+  }
+};
+
+// 邮箱验证码登录
+const handleEmailCodeLogin = async () => {
+  const { valid } = await refEmailCodeForm.value.validate();
+
+  if (valid) {
+    isEmailCodeLoading.value = true;
+    error.value = false;
+    errorMessages.value = "";
+
+    try {
+      const response = await axios.post('http://localhost:5000/email-auth/verify-login', 
+        new URLSearchParams({
+          email: emailForCode.value,
+          code: emailCode.value
+        }), {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        }
+      );
+
+      if (response.data.code === 201) {
+        // 登录成功，处理token
+        authStore.setLoggedIn(true);
+        
+        // 存储token
+        const tokenStore = userTokenStore();
+        tokenStore.setToken(response.data.data.token);
+        
+        // 获取用户信息
+        const profileRes = await axios.get("http://localhost:5000/user/userinfo", {
+          headers: {
+            Authorization: response.data.data.token,
+          },
+        });
+        
+        if (profileRes.data.code === 200) {
+          const ProfileStore = useProfileStore();
+          ProfileStore.setUser(profileRes.data.data);
+        }
+        
+        window.location.href = "/dashboard";
+      } else {
+        error.value = true;
+        errorMessages.value = response.data.message || "邮箱验证登录失败";
+      }
+    } catch (err) {
+      console.error("邮箱验证码登录出错", err);
+      error.value = true;
+      errorMessages.value = err.response?.data?.message || "网络错误，登录失败";
+    } finally {
+      isEmailCodeLoading.value = false;
+    }
+  }
+};
+
+// 开始邮箱验证码倒计时
+const startEmailCountdown = () => {
+  emailCountdown.value = 60;
+  emailCountdownTimer.value = setInterval(() => {
+    emailCountdown.value--;
+    if (emailCountdown.value <= 0) {
+      if (emailCountdownTimer.value) {
+        clearInterval(emailCountdownTimer.value);
+        emailCountdownTimer.value = null;
+      }
+    }
+  }, 1000);
+};
+
 // 重置错误
 const resetErrors = () => {
   error.value = false;
@@ -210,14 +394,15 @@ const resetPassword = () => {
   router.push(`/setpassword`);
 };
 
-// 导入需要的stores
-import { userTokenStore } from "@/stores/token";
-import { useProfileStore } from "@/stores/profileStore";
+// 导入需要的stores已在文件开头
 
 // 组件销毁时清理定时器
 onUnmounted(() => {
   if (countdownTimer.value) {
     clearInterval(countdownTimer.value);
+  }
+  if (emailCountdownTimer.value) {
+    clearInterval(emailCountdownTimer.value);
   }
 });
 </script>
@@ -238,7 +423,6 @@ onUnmounted(() => {
       dismissible
       @click:close="error = false"
     >
-      <v-icon start icon="mdi-alert-circle-outline"></v-icon>
       {{ errorMessages }}
     </v-alert>
 
@@ -251,7 +435,6 @@ onUnmounted(() => {
       dismissible
       @click:close="errorMessages = ''"
     >
-      <v-icon start icon="mdi-check-circle-outline"></v-icon>
       {{ errorMessages }}
     </v-alert>
 
@@ -265,6 +448,14 @@ onUnmounted(() => {
         <v-tab value="sms">
           <v-icon start>mdi-message-text</v-icon>
           短信登录
+        </v-tab>
+        <v-tab value="email">
+          <v-icon start>mdi-email</v-icon>
+          邮箱登录
+        </v-tab>
+        <v-tab value="email-code">
+          <v-icon start>mdi-email-check</v-icon>
+          邮箱验证码
         </v-tab>
       </v-tabs>
 
@@ -393,7 +584,132 @@ onUnmounted(() => {
             </v-btn>
           </v-form>
         </v-window-item>
-      </v-window>
+
+        <!-- 邮箱登录表单 -->
+        <v-window-item value="email">
+          <v-form
+            ref="refEmailForm"
+            class="text-left"
+            v-model="isFormValid"
+            lazy-validation
+          >
+            <v-text-field
+              v-model="email"
+              required
+              :error="error"
+              label="邮箱"
+              placeholder="请输入邮箱地址"
+              density="default"
+              variant="underlined"
+              color="primary"
+              bg-color="#fff"
+              :rules="emailRules"
+              name="email"
+              prepend-inner-icon="mdi-email"
+              @keyup.enter="handleEmailLogin"
+              @change="resetErrors"
+            ></v-text-field>
+
+            <v-text-field
+              v-model="emailPassword"
+              :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+              :type="showPassword ? 'text' : 'password'"
+              :error="error"
+              label="密码"
+              placeholder="请输入密码"
+              density="default"
+              variant="underlined"
+              color="primary"
+              bg-color="#fff"
+              :rules="emailPasswordRules"
+              name="emailPassword"
+              prepend-inner-icon="mdi-lock"
+              @change="resetErrors"
+              @keyup.enter="handleEmailLogin"
+              @click:append-inner="showPassword = !showPassword"
+            ></v-text-field>
+
+            <v-btn
+              :loading="isLoading"
+              :disabled="isSignInDisabled"
+              block
+              size="x-large"
+              color="primary"
+              @click="handleEmailLogin"
+              class="mt-4 font-weight-bold"
+            >
+              登录
+            </v-btn>
+                     </v-form>
+         </v-window-item>
+
+         <!-- 邮箱验证码登录表单 -->
+         <v-window-item value="email-code">
+           <v-form
+             ref="refEmailCodeForm"
+             class="text-left"
+             v-model="isFormValid"
+             lazy-validation
+           >
+             <v-text-field
+               v-model="emailForCode"
+               required
+               label="邮箱"
+               placeholder="请输入邮箱地址"
+               density="default"
+               variant="underlined"
+               color="primary"
+               bg-color="#fff"
+               :rules="emailRules"
+               name="emailForCode"
+               prepend-inner-icon="mdi-email"
+               @change="resetErrors"
+             ></v-text-field>
+
+             <div class="d-flex align-center">
+               <v-text-field
+                 v-model="emailCode"
+                 required
+                 label="验证码"
+                 placeholder="请输入6位验证码"
+                 density="default"
+                 variant="underlined"
+                 color="primary"
+                 bg-color="#fff"
+                 :rules="emailCodeRules"
+                 name="emailCode"
+                 prepend-inner-icon="mdi-email-check"
+                 class="flex-grow-1 mr-2"
+                 @keyup.enter="handleEmailCodeLogin"
+                 @change="resetErrors"
+               ></v-text-field>
+
+               <v-btn
+                 :loading="isSendingEmailCode"
+                 :disabled="emailCountdown > 0 || !emailForCode"
+                 color="primary"
+                 variant="outlined"
+                 @click="sendEmailCode"
+                 class="mb-6"
+               >
+                 {{ emailCountdown > 0 ? `${emailCountdown}s` : '发送验证码' }}
+               </v-btn>
+             </div>
+
+             <v-btn
+               :loading="isEmailCodeLoading"
+               :disabled="!emailCode || emailCode.length !== 6"
+               block
+               size="x-large"
+               color="primary"
+               @click="handleEmailCodeLogin"
+               class="mt-4 font-weight-bold"
+             >
+               登录
+             </v-btn>
+           </v-form>
+         </v-window-item>
+       </v-window>
 
       <div class="mt-5 text-center">
         <router-link class="text-primary" to="/auth/forgot-password" @click="resetPassword">

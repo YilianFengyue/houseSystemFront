@@ -133,8 +133,61 @@ export const useAuthStore = defineStore("auth", {
          throw new Error(errorMsg); // 新增这行
       }
     },
-    loginWithEmailAndPassword(email: string, password: string) {
-      router.push("/");
+    async loginWithEmailAndPassword(email: string, password: string) {
+      try {
+        const response = await axios.post(
+          "http://localhost:5000/user/email-login",
+          new URLSearchParams({
+            email,
+            password,
+          }),
+          {
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+          }
+        );
+
+        if (response.data.code === 201) {
+          this.setLoggedIn(true);
+          this.user = response.data.data;
+          
+          // 存储token到pinia
+          const tokenStore = userTokenStore();
+          tokenStore.setToken(response.data.msg);
+          console.log("tokenStore", tokenStore.token);
+          
+          // 存储用户信息到profilestore
+          console.log("完整邮箱登录响应数据：", response.data);
+          console.log("拼接出的 Authorization:", `Bearer ${response.data.data.token}`);
+           
+          const profileRes = await axios.get("http://localhost:5000/user/userinfo", {
+            headers: {
+              Authorization: `${response.data.data.token}`,
+            },
+          });
+          
+          if (profileRes.data.code === 200) {
+            const ProfileStore = useProfileStore();
+            console.log(profileRes.data.data)
+            ProfileStore.setUser(profileRes.data.data);
+            console.log("更新后 Pinia 中的 user 信息:", ProfileStore.user);
+          } else {
+            console.error("获取用户信息失败：", profileRes.data.message);
+          }
+          
+          window.location.href = "/dashboard";
+        } else {
+          const snackbarStore = useSnackbarStore();
+          snackbarStore.showErrorMessage("邮箱或密码错误！");
+          console.error("邮箱登录失败：", response.data.message);
+          throw new Error(response.data.message || "邮箱登录失败，密码或邮箱错误");
+        }
+      } catch (error: any) {
+        const errorMsg = error?.response?.data?.message || error.message;
+        console.error("邮箱登录请求异常：", error?.response?.data?.message || error.message);
+        throw new Error(errorMsg);
+      }
     },
 
     logout() {
