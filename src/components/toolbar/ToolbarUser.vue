@@ -3,7 +3,7 @@
 * @Maintainer: J.K. Yang
 * @Description:
 -->
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 import {onMounted} from "vue";
 //Token##########################################
 import {userTokenStore} from "@/stores/token";
@@ -22,7 +22,7 @@ import { useProfileStore } from "@/stores/profileStore";
 import axios from "axios";
 const profileStore = useProfileStore();
 const account = reactive({ ...profileStore.user });
-const signon = reactive({ ...profileStore.signon });
+
 //#############################################
 
 const authStore = useAuthStore();
@@ -98,8 +98,45 @@ onMounted(() => {
     loadUserAvatar();
   }
 });
-</script>
+</script> -->
+<script setup lang="ts">
+import { storeToRefs } from 'pinia';
+import { useRouter } from "vue-router";
+import { userTokenStore } from "@/stores/token"; // 假设你的文件名是 tokenStore
+import { useProfileStore } from "@/stores/profileStore";
+import StatusMenu from "./StatusMenu.vue";
 
+// --- 1. 获取 Store 实例 ---
+const router = useRouter();
+const tokenStore = userTokenStore();
+const profileStore = useProfileStore();
+
+// --- 2. 使用 storeToRefs 创建响应式引用 ---
+// 这样 isLoggedIn 和 user 就会始终与 store 保持同步
+const { isLoggedIn } = storeToRefs(tokenStore);
+const { user } = storeToRefs(profileStore);
+
+// --- 3. 保留需要的函数 ---
+const handleLogout = () => {
+  tokenStore.removeToken();
+  // 推荐使用 router.push，除非你确实需要硬刷新
+  router.push("/auth/signin"); 
+};
+
+const goToSignIn = () => {
+  router.push("/auth/signin");
+};
+
+const navs = [
+  {
+    title: "个人中心", // 优化一下文案
+    link: "/profile",
+    icon: "mdi-account-box-outline",
+  },
+];
+
+// 之前那个复杂的 loadUserAvatar 函数和相关的 onMounted 都可以彻底删除了！
+</script>
 <template>
    <!-- 未登录时显示登录按钮 -->
    <v-menu
@@ -188,8 +225,8 @@ onMounted(() => {
         <v-badge content="2" color="success" dot bordered>
           <v-avatar size="40">
             <v-img
-              :src="avatarUrl || './images/unavater.png'"
-              :key="avatarRefreshKey"
+              :src="user.avatarUrl || './images/unavater.png'"
+              
             ></v-img>
           </v-avatar>
         </v-badge>
@@ -202,18 +239,18 @@ onMounted(() => {
           <template v-slot:prepend>
             <v-avatar size="40">
               <v-img
-                :src="avatarUrl || './images/unavater.png'"
-                :key="avatarRefreshKey"
+                :src="user.avatarUrl || './images/unavater.png'"
+                
               ></v-img>
             </v-avatar>
           </template>
 
           <v-list-item-title class="font-weight-bold text-primary">
-            {{account.name}}
+            {{user.name}}
             <StatusMenu />
           </v-list-item-title>
           <v-list-item-subtitle>
-            {{account.email}}
+            {{user.email}}
           </v-list-item-subtitle>
         </v-list-item>
       </v-list>

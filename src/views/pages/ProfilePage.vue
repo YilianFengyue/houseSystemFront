@@ -12,6 +12,80 @@ import { formatIdCard } from '@/utils/formatIdCard';
 import { useRouter } from 'vue-router';
 import axios from 'axios'; // 引入 axios
 
+import { useSnackbarStore } from "~/src/stores/snackbarStore";
+const snackbarStore = useSnackbarStore();
+//图像裁剪
+import AvatarCropper from '~/src/components/User/AvatarCropper.vue'; 
+const isCropperOpen = ref(false);
+// 3. 准备处理上传的函数，它会接收子组件传来的 blob 和 done 回调
+const onAvatarUpload = async (blob: Blob, done: () => void) => {
+  console.log("收到裁剪后的Blob，开始新的两步上传流程...", blob);
+  // 1. 将收到的 Blob 包装成 File 对象，准备上传到OSS
+  const avatarFile = new File([blob], "avatar.jpg", { type: "image/jpeg" });
+  const ossFormData = new FormData();
+  ossFormData.append("image", avatarFile); // 后端OSS接口接收的字段名叫 'image'
+  try {
+    // --- 步骤 1: 上传图片到 OSS 接口 ---
+    console.log("步骤1: 正在上传图片到OSS...");
+    const ossResponse = await axios.post(
+      'http://localhost:5000/oss/upload_general_image',
+      ossFormData,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      }
+    );
+
+    if (!ossResponse.data || !ossResponse.data.success) {
+      // 如果oss上传失败，则直接抛出错误
+      throw new Error(ossResponse.data.message || '图片服务器上传失败');
+    }
+
+    const newAvatarUrl = ossResponse.data.image_url;
+    console.log("步骤1成功: 获取到新的OSS URL:", newAvatarUrl);
+
+    // --- 步骤 2: 将新的 OSS URL 更新到用户信息中 ---
+    console.log("步骤2: 正在更新用户信息...");
+    const userId = profileStore.getUserId(); // 从你的 store 获取用户ID
+    console.log("用户ID:", userId);
+    // 准备只包含头像信息的 payload
+    const userInfoPayload = {
+      id: userId,
+      avatarUrl: newAvatarUrl // 你的用户表里字段名可能是 avatarUrl
+    };
+
+    const userUpdateResponse = await axios.put(
+      'http://localhost:5000/user/userinfo',
+      userInfoPayload
+    );
+
+    if (!userUpdateResponse.data || !userUpdateResponse.data.success) {
+        throw new Error(userUpdateResponse.data.message || '更新用户信息失败');
+    }
+    
+    // --- 全部成功 ---
+    console.log("步骤2成功: 用户信息已更新");
+    snackbarStore.showSuccessMessage('头像更新成功！');
+    
+    // 更新 Pinia Store，让页面上的头像立刻变化
+    profileStore.updateAvatar(newAvatarUrl);
+    // 上传成功后刷新头像
+    loadUserAvatar();
+    
+    // 关闭裁剪对话框
+    isCropperOpen.value = false; // 假设你的对话框开关是 isCropperOpen
+
+  } catch (error: any) {
+    // 统一处理上述两个步骤中任意环节的错误
+    const errorMessage = error.message || '操作失败，请重试';
+    snackbarStore.showErrorMessage(errorMessage);
+    console.error('头像更新流程出错:', error);
+  } finally {
+    // 无论成功还是失败，都必须调用 done() 回调
+    // 这会通知 AvatarCropper 组件解除 loading 状态
+    done();
+  }
+
+};
 const profileStore = useProfileStore();
 // 相关信息
 const newpassword = ref("");
@@ -364,6 +438,9 @@ const triggerFileInput = () => {
 </script>
 
 <template>
+  <v-container>
+    <AvatarCropper v-model:dialog="isCropperOpen" @upload="onAvatarUpload" />
+  </v-container>
   <v-sheet elevation="0" class="mx-auto" color="transparent" max-width="1600">
 
     <!-- 添加Snackbar通知 -->
@@ -382,18 +459,11 @@ const triggerFileInput = () => {
         <v-img 
           :src="user.avatarUrl || DEFAULT_AVATAR" 
           :key="avatarRefreshKey" 
+          @click="isCropperOpen = true" style="cursor: pointer;"
         ></v-img>
       </v-avatar>
       
-      <!-- 上传按钮（始终显示） -->
-      <v-btn
-        class="mt-3"
-        color="primary"
-        :loading="isUploading"
-        @click="avatarInput?.click()"
-      >
-        更换头像
-      </v-btn>
+      
       
       <!-- 隐藏的文件输入 -->
       <input
@@ -408,11 +478,20 @@ const triggerFileInput = () => {
         <h3 class="text-h6 font-weight-bold">
           {{user.name}}
           <v-chip size="small" class="font-weight-bold" color="blue">
-            User
+            租客
           </v-chip>
         </h3>
-        <p class="text-body-2">Costumer of Petstore</p>
+        <p class="text-body-2">Costumer</p>
       </div>
+      <!-- 上传按钮（始终显示） -->
+      <v-btn
+        class="mt-3"
+        color="primary"
+        :loading="isUploading"
+        @click="avatarInput?.click()"
+      >
+        更换头像
+      </v-btn>
     </div>
 
     <v-divider></v-divider>
@@ -560,9 +639,9 @@ const triggerFileInput = () => {
                   disabled
                 >
                   <Icon
-                    icon="logos:google-icon"
+                    icon="logos:microsoft-icon"
                     class="mr-3 my-2"
-                  />Google
+                  />Microsoft
                 </v-btn>
               </v-col>
               <v-col cols="12" md="6">
@@ -682,6 +761,7 @@ const triggerFileInput = () => {
             >
               修改密码
             </v-btn>
+            
           </v-card-actions>
         </v-card>
 

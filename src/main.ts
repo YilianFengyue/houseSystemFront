@@ -24,7 +24,7 @@ import { autoAnimatePlugin } from '@formkit/auto-animate/vue'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate' // 引入插件
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
-
+import 'vue-advanced-cropper/dist/style.css';//导入样式
 const pinia = createPinia();
 pinia.use(piniaPersist);
 const app = createApp(App);
