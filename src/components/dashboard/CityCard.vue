@@ -1,6 +1,6 @@
 <template>
   <v-card  class="my-5" rounded>
-    <v-card-actions><v-card-title class="card-title text-h5">热门地区</v-card-title>
+    <v-card-actions><v-card-title class="card-title text-h5 font-weight-bold">热门地区</v-card-title>
     <v-spacer></v-spacer>
     <v-btn 
     color="primary"
@@ -17,7 +17,7 @@
           <template v-for="(card, idx) in cards" :key="idx">
             <!-- 普通卡片 -->
             <v-col v-if="!card.children" :cols="card.flex">
-              <v-card elevation="16" rounded="0"  hover>
+              <v-card elevation="16" rounded="3"  hover>
                 <v-img
                   :src="card.src"
                   class="align-end"
@@ -26,7 +26,7 @@
                   cover
                 >
                   <v-card-title class="text">{{ card.title }}</v-card-title>
-                <v-card-subtitle class="text-caption text-white">{{ card.el }}</v-card-subtitle>
+                <v-card-subtitle class=" text-white mb-2 font-weight-bold">{{ card.el }}</v-card-subtitle>
                 </v-img>
               </v-card>
             </v-col>
@@ -39,7 +39,7 @@
                   :key="cIdx"
                   :cols="child.flex"
                 >
-                  <v-card elevation="16" rounded="0">
+                  <v-card elevation="16" rounded="3">
                     <v-img
                       :src="child.src"
                       class="align-end"
@@ -48,7 +48,7 @@
                       cover
                     >
                       <v-card-title class="text">{{ child.title }}</v-card-title>
-                      <v-card-subtitle class="text-caption text-white">{{child.el}}</v-card-subtitle>
+                      <v-card-subtitle class=" text-white mb-2 font-weight-bold">{{child.el}}</v-card-subtitle>
                     </v-img>
                   </v-card>
                 </v-col>
@@ -66,7 +66,7 @@
 import { useRouter } from 'vue-router'
 const router = useRouter()
 function goHouseDetail() {
-  router.push(`/house`)
+  router.push(`/houseList`)
 }
 const cards = [
   {
@@ -94,6 +94,5 @@ const cards = [
   color: #fff;
   font-size: 25px;
   font-weight: bold;
-  font-family: 'Source Han Sans SC', sans-serif;
 }
 </style>

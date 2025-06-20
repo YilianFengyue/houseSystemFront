@@ -4,23 +4,22 @@
 * @Description: 留言板页面，用户可提交留言
 -->
 <script setup lang="ts">
-/*接受房源ID作为props*/
-const props = defineProps({
-  houseId: {
-    type: String,
-    required: true
-  }
-});
-
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
+import { useRoute } from "vue-router";
 import { useSnackbarStore } from "@/stores/snackbarStore";
 import { useProfileStore } from "@/stores/profileStore";
 import { MdPreview } from "md-editor-v3";
 import "md-editor-v3/lib/preview.css";
 import axios from "axios";
 
+const route = useRoute();
 const snackbarStore = useSnackbarStore();
 const profileStore = useProfileStore();
+
+// 计算属性获取houseId，如果没有则默认为1
+const houseId = computed(() => {
+  return route.params.houseId?.toString() || "1";
+});
 
 interface Message {
   id: number;
@@ -32,41 +31,52 @@ interface Message {
 }
 
 // 当前用户从profileStore获取
-const currentUser = ref(profileStore.user.name);
-
-// 留言列表
+const currentUser = ref(profileStore.user?.name || "");
 const messages = ref<Message[]>([]);
-
-// 用户输入
 const newMessage = ref("");
+const isLoading = ref(false);
 
 // 加载留言
 const loadMessages = async () => {
+  isLoading.value = true;
   try {
-    const response = await axios.get(`http://localhost:5000/comments/${props.houseId}`);
-    if (response.data.data && response.data.data.length > 0) {
-      // 转换数据格式以适应前端
-      messages.value = response.data.data.map((comment: any) => ({
-        id: comment.comment_id,
-        content: comment.desc,
-        username: comment.username,
-        timestamp: comment.time,
-        at: comment.at || undefined
-      }));
-      
-      // 为每条留言添加被回复的用户名
-      messages.value.forEach(message => {
-        if (message.at) {
-          const repliedMessage = messages.value.find(m => m.id === message.at);
-          if (repliedMessage) {
-            message.atUsername = repliedMessage.username;
-          }
-        }
-      });
+    const response = await axios.get(`http://localhost:5000/comments/${houseId.value}`);
+    
+    // 处理空数据情况
+    if (!response.data?.data) {
+      messages.value = [];
+      return;
     }
+
+    // 转换数据格式
+    const rawMessages = Array.isArray(response.data.data) ? response.data.data : [];
+    messages.value = rawMessages.map((comment: any) => ({
+      id: comment.comment_id,
+      content: comment.desc,
+      username: comment.username,
+      timestamp: comment.time,
+      at: comment.at || undefined
+    }));
+
+    // 为每条留言添加被回复的用户名
+    messages.value.forEach(message => {
+      if (message.at) {
+        const repliedMessage = messages.value.find(m => m.id === message.at);
+        if (repliedMessage) {
+          message.atUsername = repliedMessage.username;
+        }
+      }
+    });
+
   } catch (error) {
-    console.error("加载留言失败:", error);
-    snackbarStore.showErrorMessage("加载留言失败，请稍后重试");
+    // 404错误视为无留言，不显示错误提示
+    if (axios.isAxiosError(error) && error.response?.status !== 404) {
+      console.error("加载留言失败:", error);
+      snackbarStore.showErrorMessage("加载留言失败，请稍后重试");
+    }
+    messages.value = [];
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -84,24 +94,22 @@ const submitMessage = async () => {
 
   try {
     const response = await axios.post("http://localhost:5000/comments", {
-      house_id: parseInt(props.houseId),
+      house_id: parseInt(houseId.value),
       username: currentUser.value,
-      type: 1, // 假设1表示租客，根据实际情况调整
+      type: 1,
       desc: newMessage.value,
-      at: null // 暂时不实现回复功能
+      at: null
     });
 
     if (response.status === 201) {
-      // 添加新留言到列表
       const newComment = response.data.data;
-      messages.value.push({
+      messages.value.unshift({
         id: newComment.comment_id,
         content: newComment.desc,
         username: newComment.username,
         timestamp: newComment.time
       });
       
-      // 清空输入
       newMessage.value = "";
       snackbarStore.showSuccessMessage("留言已提交，感谢您的反馈！");
     }
@@ -118,8 +126,13 @@ const formatTime = (timeString: string) => {
 
 // 监听用户信息变化
 watch(() => profileStore.user, (newUser) => {
-  currentUser.value = newUser.name;
+  currentUser.value = newUser?.name || "";
 }, { deep: true });
+
+// 监听houseId变化重新加载留言
+watch(houseId, () => {
+  loadMessages();
+});
 
 // 组件挂载时加载留言
 onMounted(() => {
@@ -129,11 +142,19 @@ onMounted(() => {
 
 <template>
   <div class="message-board">
-    <v-container>
+    <v-container fluid>
       <v-row justify="center">
-        <v-col cols="12" md="12">  <!-- 增加宽度 -->
+        <v-col cols="12" md="12">
+          <!-- 加载状态 -->
+          <v-progress-linear
+            v-if="isLoading"
+            indeterminate
+            color="primary"
+            class="mb-4"
+          ></v-progress-linear>
+          
           <!-- 留言列表 -->
-          <v-card class="mb-6 pa-5" elevation="2" v-if="messages.length > 0">
+          <v-card class="mb-6 pa-5" elevation="2" v-if="!isLoading && messages.length > 0">
             <h2 class="text-h5 mb-4">留言评论</h2>
             
             <perfect-scrollbar class="message-list" style="max-height: 500px;">
@@ -164,8 +185,14 @@ onMounted(() => {
           </v-card>
           
           <!-- 无留言提示 -->
-          <v-card v-else class="mb-6 pa-5 text-center" elevation="2">
-            <p>暂无留言，快来发表第一条留言吧！</p>
+          <v-card 
+            v-if="!isLoading && messages.length === 0" 
+            class="mb-6 pa-5 text-center" 
+            elevation="2"
+          >
+            <v-icon size="64" color="grey lighten-1" class="mb-4">mdi-comment-outline</v-icon>
+            <p class="text-h6">暂无留言</p>
+            <p class="text-body-1 text-grey">快来发表第一条留言吧！</p>
           </v-card>
           
           <!-- 留言表单 -->

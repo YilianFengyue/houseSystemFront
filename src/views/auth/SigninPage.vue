@@ -1,6 +1,9 @@
+
 <script setup lang="ts">
 import { Icon } from "@iconify/vue";
 import { useAuthStore } from "@/stores/authStore";
+import axios from "axios";
+import router from "~/src/router";
 
 
 
@@ -15,23 +18,40 @@ const email = ref("vuetify3-visitor@gmail.com");
 const password = ref("123456");
 const isFormValid = ref(true);
 
+
+//Google
 // show password field
 const showPassword = ref(false);
 
+import { nextTick } from 'vue';
 const handleLogin = async () => {
   const { valid } = await refLoginForm.value.validate();
+
   if (valid) {
     isLoading.value = true;
     isSignInDisabled.value = true;
+    error.value = false; // 重置错误状态
+    errorMessages.value = ""; // 清空错误消息
 
     try {
       await authStore.loginWithUsernameAndPassword(phone.value, password.value);
     } catch (err) {
       console.error("登录出错", err);
+      // 确保错误状态更新
+      error.value = true;
+      errorMessages.value = "用户名或密码错误";
+      // 强制UI更新
+      await nextTick();
+      // 震动效果
+      refLoginForm.value.$el.classList.add('shake');
+      setTimeout(() => {
+        refLoginForm.value.$el.classList.remove('shake');
+      }, 500);
+      return; // 直接返回，避免继续执行
+    } finally {
+      isLoading.value = false;
+      isSignInDisabled.value = false;
     }
-
-    isLoading.value = false;
-    isSignInDisabled.value = false;
   } else {
     console.log("表单验证失败");
   }
@@ -40,9 +60,29 @@ const handleLogin = async () => {
 const signInWithGoolgle = () => {
   authStore.loginWithGoogle();
 };
-const signInWithGithub = () => {
-  authStore.loginWithGithub();
+const signInWithGithub = async () => {
+  const backendUrl = 'http://127.0.0.1:5000';
+  const returnTo = encodeURIComponent(window.location.href);
+  window.location.href = `${backendUrl}/github/login?next=${returnTo}`;
+
 };
+
+// 页面加载时检查是否 GitHub 回调带 token--LU
+const checkForToken = async () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('token');
+  console.log('token', token);
+  if (token) {
+    await authStore.handleGithubCallback(token); // ✅ 替代手动写 sessionStorage 和跳转
+    // 清除 URL 参数
+    const cleanUrl = window.location.pathname;
+    window.history.replaceState({}, '', cleanUrl);
+    // 跳转到 dashboard
+    window.location.href = '/profile';
+  }
+};
+checkForToken(); // 加载时执行
+
 // Error Check
 const emailRules = ref([
   (v: string) => !!v || "E-mail is required",
@@ -71,6 +111,12 @@ const resetErrors = () => {
 const signInWithFacebook = () => {
   alert(authStore.isLoggedIn);
 };
+
+const resetPassword = () => {
+  // 重置密码
+   router.push(`/setpassword`);
+  }
+
 </script>
 <template>
   <v-card color="white" class="pa-3 ma-3" elevation="3">
@@ -78,6 +124,20 @@ const signInWithFacebook = () => {
       <span class="flex-fill"> Welcome </span>
     </v-card-title>
     <v-card-subtitle>Sign in to your account</v-card-subtitle>
+
+      
+     <v-alert
+      v-if="error"
+      type="error"
+      variant="tonal"
+      class="mb-4 mx-3"
+      dismissible
+      @click:close="error = false"
+    >
+      <v-icon start icon="mdi-alert-circle-outline"></v-icon>
+      {{ errorMessages }}
+    </v-alert>
+
     <!-- sign in form -->
 
     <v-card-text>
@@ -126,6 +186,8 @@ const signInWithFacebook = () => {
           @keyup.enter="handleLogin"
           @click:append-inner="showPassword = !showPassword"
         ></v-text-field>
+
+
         <v-btn
           :loading="isLoading"
           :disabled="isSignInDisabled"
@@ -133,10 +195,10 @@ const signInWithFacebook = () => {
           size="x-large"
           color="primary"
           @click="handleLogin"
-          class="mt-2"
-          >{{ $t("login.button") }}</v-btn
+          class="mt-2 font-weight-bold "
+          >登录</v-btn
         >
-
+      
         <div
           class="text-grey text-center text-caption font-weight-bold text-uppercase my-5"
         >
@@ -174,8 +236,9 @@ const signInWithFacebook = () => {
         </div>
 
         <div class="mt-5 text-center">
-          <router-link class="text-primary" to="/auth/forgot-password">
-            {{ $t("login.forgot") }}
+          <router-link class="text-primary" to="/auth/forgot-password" @click="resetPassword">
+            <!--{{ $t("login.forgot") }}-->
+             忘记密码？
           </router-link>
         </div>
       </v-form></v-card-text

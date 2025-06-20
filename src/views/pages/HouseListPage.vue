@@ -2,8 +2,8 @@
 <div class="pa-5">
   <v-container fluid class="pa-0">
     <v-card class="mb-5 pa-4" flat outlined>
-      <v-card-title class="text-h6 font-weight-medium pl-0">
-        查找房源
+      <v-card-title class="text-h5 font-weight-bold pl-0">
+        智能搜索
       </v-card-title>
       <v-row align="center" dense>
         <v-col cols="12">
@@ -92,7 +92,7 @@
             class="mr-2"
             style="max-width: 100px;"
           ></v-text-field>
-          <v-btn size="small" color="primary" variant="outlined" @click="applyCustomPriceRange" class="mt-2 mt-md-0">确定</v-btn>
+          <v-btn  color="primary" variant="outlined" @click="applyCustomPriceRange" class="mt-2 mt-md-0">确定</v-btn>
         </v-col>
       </v-row>
 
@@ -217,20 +217,103 @@
         </v-col>
 
         <v-col cols="12" md="4">
-            <v-card
-              class="mx-auto recommendation-card"
-              prepend-icon="mdi-star-circle-outline"
-              width="100%" 
-            >
-              <template v-slot:title>
-              <span class="font-weight-black">热门推荐</span>
-              </template>
-              <v-card-subtitle>周边好房不容错过</v-card-subtitle>
-              <v-card-text class="bg-surface-light pt-4">
-              这里可以放置热门房源推荐、广告或其他相关信息。
-              例如根据当前浏览或筛选条件推荐相似房源。
-              </v-card-text>
-            </v-card>
+                    <v-card
+                      class="mx-auto recommendation-card"
+                      prepend-icon="mdi-star-circle-outline"
+                      width="100%"
+                      elevation="2"
+                    >
+                      <template v-slot:title>
+                        <span class="font-weight-black text-primary">热门推荐</span>
+                      </template>
+                      
+                      <v-card-subtitle class="text-caption">周边好房不容错过</v-card-subtitle>
+                      
+                      <v-card-text class="bg-surface-light pt-4 pb-2">
+                        <template v-if="loadingRecommendation">
+                          <v-skeleton-loader type="article"></v-skeleton-loader>
+                        </template>
+                        
+                        <template v-else-if="recommendedHouse">
+                          <v-row class="mb-2">
+                            <v-chip variant="outlined" color="primary" size="small" class="mr-2">
+                              {{ recommendedHouse.rent_type || '整租' }}
+                            </v-chip>
+                            <span class="text-subtitle-1 font-weight-medium">
+                              {{ recommendedHouse.title.split(' ')[0] || '尚鑫海悦' }}
+                            </span>
+                          </v-row>
+                          
+                          <v-row class="mb-3">
+                            <div class="d-flex align-center">
+                              <v-icon icon="mdi-floor-plan" size="small" class="mr-1"></v-icon>
+                              <span class="text-caption">{{ recommendedHouse.rooms || '1室0厅' }}</span>
+                              
+                              <v-icon 
+                                v-if="recommendedHouse.direction"
+                                icon="mdi-compass" 
+                                size="small" 
+                                class="ml-3 mr-1"
+                              ></v-icon>
+                              <span class="text-caption" v-if="recommendedHouse.direction">
+                                {{ recommendedHouse.direction }}
+                              </span>
+                            </div>
+                          </v-row>
+                          
+                          <v-row class="mb-2">
+                            <v-chip v-if="recommendedHouse.decoration" size="small" class="mr-1">
+                              {{ recommendedHouse.decoration }}
+                            </v-chip>
+                            <v-chip 
+                              v-if="recommendedHouse.area" 
+                              size="small" 
+                              variant="outlined"
+                            >
+                              {{ recommendedHouse.area }}m²
+                            </v-chip>
+                          </v-row>
+                          
+                          <v-row class="align-center">
+                            <span class="text-h6 text-primary font-weight-bold">
+                              {{ recommendedHouse.price }}<span class="text-subtitle-2">元/月</span>
+                            </span>
+                            
+                            <v-spacer></v-spacer>
+                            
+                            <div class="d-flex align-center">
+                              <v-avatar color="primary" size="32">
+                                <v-icon icon="mdi-account" size="small"></v-icon>
+                              </v-avatar>
+                              <span class="text-caption ml-2">
+                                {{ recommendedHouse.landlord || '个人房源' }}
+                              </span>
+                            </div>
+                          </v-row>
+                        </template>
+                        
+                        <template v-else>
+                          <v-alert type="info" variant="tonal" class="my-2">
+                            暂无热门推荐
+                          </v-alert>
+                        </template>
+                      </v-card-text>
+                      
+                      <v-divider class="my-2"></v-divider>
+
+                      <v-card-actions class="px-4 pb-4 pt-0">
+                        <v-btn 
+                          color="primary" 
+                          variant="tonal" 
+                          block
+                          append-icon="mdi-arrow-right"
+                          :disabled="!recommendedHouse"
+                          @click="recommendedHouse && goToHouseDetail(recommendedHouse.id)"
+                        >
+                          查看详情
+                        </v-btn>
+                      </v-card-actions>
+                    </v-card>
         </v-col>
       </v-row>
       
@@ -442,6 +525,49 @@ const goToHouseDetail = (houseId: number) => {
 
 onMounted(async () => {
   await loadHouses();
+  console.log("Houses data after initial load:", houses.value);
+});
+
+// 添加热门推荐房源的接口类型
+interface RecommendedHouse {
+  id: number;
+  title: string;
+  community: string | null;
+  block: string | null;
+  area: number;
+  price: number;
+  rent_type: string;
+  rooms: string;
+  direction: string | null;
+  decoration: string;
+  landlord: string;
+  image_url: string;
+  publish_time: string;
+}
+
+// 添加热门推荐房源的状态
+const recommendedHouse = ref<RecommendedHouse | null>(null);
+const loadingRecommendation = ref(false);
+
+// 添加获取热门推荐的方法
+const fetchRecommendedHouse = async () => {
+  loadingRecommendation.value = true;
+  try {
+    const response = await fetch('http://127.0.0.1:5000/houseinfo/views');
+    const data = await response.json();
+    if (data.success && data.code === 200) {
+      recommendedHouse.value = data.data;
+    }
+  } catch (error) {
+    console.error('获取热门推荐失败:', error);
+  } finally {
+    loadingRecommendation.value = false;
+  }
+};
+
+// 在 onMounted 中调用
+onMounted(async () => {
+  await Promise.all([loadHouses(), fetchRecommendedHouse()]);
   console.log("Houses data after initial load:", houses.value);
 });
 

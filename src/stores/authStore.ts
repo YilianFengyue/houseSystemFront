@@ -41,7 +41,7 @@ export const useAuthStore = defineStore("auth", {
     },
     //注册方法
 
-    async registerWithUsernameAndPassword(phone: string, password: string) {
+    async registerWithUsernameAndPassword(phone: string, password: string, email: string) {
       try {
 
         const response = await axios.post(
@@ -50,6 +50,7 @@ export const useAuthStore = defineStore("auth", {
           new URLSearchParams({
             phone,
             password,
+            email,
           }),
           {
             headers: {
@@ -117,14 +118,19 @@ export const useAuthStore = defineStore("auth", {
             } else {
               console.error("获取用户信息失败：", profileRes.data.message);
             }
-           router.push("/dashboard");
+           //router.push("/dashboard");
+           window.location.href = "/dashboard";//转变跳转方式解决登录bug
         } else {
+          
           const snackbarStore = useSnackbarStore();
           snackbarStore.showErrorMessage("密码错误！");
           console.error("登录失败：", response.data.message);
+          throw new Error(response.data.message || "登录失败，密码或用户名错误");//抛出错误，显示错误信息
         }
       } catch (error: any) {
+        const errorMsg = error?.response?.data?.message || error.message;
         console.error("请求异常：", error?.response?.data?.message || error.message);
+         throw new Error(errorMsg); // 新增这行
       }
     },
     loginWithEmailAndPassword(email: string, password: string) {
@@ -156,5 +162,40 @@ export const useAuthStore = defineStore("auth", {
     logout() {
       router.push({ name: "auth-signin" });
     },
+
+    //修改：第三方登录--LULin
+    async handleGithubCallback(token: string) {
+  try {
+    // 1. 存储 token
+    const tokenStore = userTokenStore();
+    tokenStore.setToken(token);
+    
+    // 2. 获取用户信息
+    const res = await axios.get('http://127.0.0.1:5000/user/userinfo', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (res.data.code === 200) {
+      // 3. 更新 authStore 状态
+      this.setLoggedIn(true);
+      this.user = res.data.data;
+      
+      // 4. 更新 profileStore
+      const profileStore = useProfileStore();
+      profileStore.setUser(res.data.data);
+      
+      // 5. 重定向到主页
+      window.location.href = "/dashboard";
+    } else {
+      console.error('获取用户信息失败:', res.data.message);
+      throw new Error(res.data.message);
+    }
+  } catch (err) {
+    console.error('GitHub 登录处理失败:', err);
+    throw err;
+  }
+}
   },
 });

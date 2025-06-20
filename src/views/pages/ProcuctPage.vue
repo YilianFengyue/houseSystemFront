@@ -7,10 +7,10 @@ import HouseCard1 from "~/src/components/houseDetail/HouseCard1.vue";
 import Newsletter2 from "~/src/components/houseDetail/Newsletter2.vue";
 import Feature5 from "~/src/components/houseDetail/Feature5.vue";
 import HouseFacilities from "~/src/components/houseDetail/HouseFacilities.vue";
-import Map from "~/src/components/dashboard/Map.vue";
+import Map from "~/src/components/HouseDetail/Map.vue";
 import { onMounted } from "vue";
 const route = useRoute();
-const id = route.params.id;
+const id = route.params.id||"1";
 
 const detail = ref({ 
   created_at: "2025-05-22T21:32:16",
@@ -55,7 +55,7 @@ const house =ref(
 );
 const fetchHouce = async () => {
   try {
-    const response = await axios.get(`http://localhost:5000/houseinfo/${id}`);
+    const response = await axios.get(`http://localhost:5000/houseinfo/${id}`, {withCredentials: true});
     house.value = response.data.data; // 假设返回的是数组
   } catch (error) {
     console.error("获取数据失败:", error);
@@ -63,16 +63,36 @@ const fetchHouce = async () => {
 };
 const fetchHouseDetail = async () => {
   try {
-    const response = await axios.get(`http://localhost:5000/housedetail/${id}`);
+    const response = await axios.get(`http://localhost:5000/housedetail/${id}`, {withCredentials: true});
     detail.value = response.data.data; // 假设返回的是数组
   } catch (error) {
     console.error("获取数据失败:", error);
+  }
+};
+
+
+const fetchRecommendedHouse = async () => {
+  try {
+    const response = await axios.post(
+      `http://127.0.0.1:5000/houseinfo/views`,
+      { houseid: id }, // POST 请求体数据
+      {
+        headers: {
+          'Content-Type': 'application/json' // 确保设置正确的 Content-Type
+        }
+      }
+    );
+    console.log("浏览次数++:", response.data);
+    // 这里可以处理返回的热门推荐数据
+  } catch (error) {
+    console.error("获取热门推荐失败:", error);
   }
 };
 onMounted(() => {
   console.log("Dashboard mounted");
   fetchHouce();
   fetchHouseDetail();
+  fetchRecommendedHouse(); // 新增调用
   console.log("House data:", house.value);
   console.log("House detail data:", detail.value);
 });
@@ -90,9 +110,8 @@ onMounted(() => {
       <v-col cols="12" xl="4">
           <Map :address="`湖南省长沙市${house.region}${house.block}${house.community}`" />
       </v-col>
-      <v-col cols="12" xl="12">
+      <v-col cols="12" md="12">
         <Feature5 :houseId="id"/>
-        <!-- <Newsletter2 :houseId="id" /> -->
       </v-col>
     </v-row>
   </div>

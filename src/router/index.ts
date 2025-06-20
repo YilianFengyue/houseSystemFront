@@ -57,6 +57,35 @@ export const routes = [
     },
     component: () => import("@/views/pages/ProcuctPage.vue"),
   },
+  //管理员
+  {
+    path: "/admin",
+    meta: {
+      requiresAuth: true,
+      layout: "landing",
+    },
+    component: () => import("@/views/pages/Admin/AdministratorPanel.vue"),
+  },
+  //富文本编辑器
+  {
+    path: "/newsEditor",
+    component: () => import("@/views/pages/News/editor/RichTextEditorPage.vue"),
+    meta: {
+      requiresAuth: true,
+      layout: "landing",
+      category: "Data",
+      title: "RichTextEditor",
+    },
+  },
+  //房东发布房源界面：
+  {
+    path: "/landlordUpload",
+    meta: {
+      requiresAuth: true,
+      layout: "landing",
+    },
+    component: () => import("@/views/pages/landlord/uploadHousePage.vue"),
+  },
   {
     path: "/house/:id",
     meta: {
@@ -167,6 +196,49 @@ export const routes = [
       },
       component: () => import("@/views/pages/contractpage.vue"),
     },
+    {
+      path: "/RentHouse",
+      meta: {
+        requiresAuth: true,
+        layout: "landing",
+      },
+      component: () => import("@/views/pages/AccountRentHouse.vue"),
+    },
+    {
+      path: "/setpassword",
+      meta: {
+        requiresAuth: true,
+        layout: "landing",
+      },
+      component: () => import("@/views/pages/ResetPassword.vue"),
+    },
+
+    // 支付发起页：使用 /payPay1 路由，预填假数据
+    {
+      path: "/payPay1",
+      name: "Checkout",
+      meta: {
+        requiresAuth: true,
+        layout: "landing",
+      },
+      component: () => import('@/views/pages/CheckoutPage.vue'),
+    },
+
+    // 支付结果页，同步回跳，路径要与 Alipay.RETURN_URL 保持一致
+    {
+      path: "/alipay/payment-result",
+      name: "PaidResult",
+      meta: {
+        requiresAuth: true,
+        layout: "landing",
+      },
+      component: () => import('@/views/pages/PaidPage.vue'),
+    },
+    // 别名 /paid 重定向到 PaidResult
+    {
+      path: "/paid",
+      redirect: { name: "PaidResult" },
+    },
 
   ...LandingRoutes,
   ...AuthRoutes,

@@ -161,6 +161,17 @@
       </v-btn>
     </v-card-actions>
 
+    <v-card-actions v-if="showPayButton">
+      <v-btn
+        color="success"
+        block
+        size="large"
+        @click="goToAlipay"
+      >
+        点击支付
+      </v-btn>
+    </v-card-actions>
+
   </v-card>
 </template>
 
@@ -172,6 +183,8 @@ import { useProfileStore } from "@/stores/profileStore";
 
 const profileStore = useProfileStore();
 const username = profileStore.user.name;
+const showPayButton = ref(false)         // 控制“点击支付”按钮显示
+const orderNo = ref('') 
 
 // 表单数据
 const formData = ref({
@@ -182,7 +195,7 @@ const formData = ref({
   landlordName: '',
   landlordId: '',
   landlordPhone: '',
-  tenantName: '',
+  tenantName: username,
   tenantId: '',
   tenantPhone: ''
 })
@@ -207,7 +220,8 @@ const submitContract = async () => {
       tenantId: formData.value.tenantId || '',
       tenantPhone: formData.value.tenantPhone || '',
       formattedRent: formatCurrency(rentValue.value),
-      currentDate: new Date().toISOString().split('T')[0]
+      currentDate: new Date().toISOString().split('T')[0],
+      houseid: houseid.value, // 新增房源ID
     }
 
     const response = await fetch('http://localhost:5000/contracts', {
@@ -227,6 +241,10 @@ const submitContract = async () => {
     console.log('提交成功:', result)
     alert('合同提交成功！')
     
+    // 自动生成订单编号
+    const now = new Date()
+    orderNo.value = `ORD-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}-${Math.floor(Math.random() * 10000)}`
+    showPayButton.value = true // 显示支付按钮
   } catch (error) {
     console.error('提交错误:', error)
     alert(`提交失败: ${error.message}`) // 显示具体错误信息
@@ -239,17 +257,20 @@ const route = useRoute()
 const rentValue = ref('')
 const landlordName = ref('')
 const landlordPhone = ref('')
-
+const houseid = ref('') // 新增房源ID变量
 
 // 从路由参数获取租金
 onMounted(() => {
   rentValue.value = route.query.rent?.toString() || ''
   landlordName.value = route.query.landlord?.toString() || ''
   landlordPhone.value = route.query.phone?.toString() || ''
-  
+  houseid.value = route.query.houseid?.toString() || ''
+  console.log('Received houseid:', houseid.value) // 调试输出
+
   // 自动填充到表单数据中
   formData.value.landlordName = landlordName.value
   formData.value.landlordPhone = landlordPhone.value
+  formData.value.landlordId = houseid.value // 新增房源ID
 })
 
 // 数字转中文大写
@@ -305,9 +326,54 @@ const handleEndDateChange = (date) => {
   endDate.value = date;
   showEndPicker.value = false;
 };
+
+const goToAlipay = async () => {
+  try {
+    const resp = await fetch('http://localhost:5000/api/alipay/pay', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        out_trade_no: orderNo.value,
+        total_amount: rentValue.value,
+        subject: '房屋租赁合同支付'
+      })
+    })
+
+    const result = await resp.json()
+    if (resp.ok && result?.data?.pay_url) {
+      window.location.href = result.data.pay_url // 跳转支付宝收银台
+    } else {
+      alert('获取支付链接失败：' + (result.message || '未知错误'))
+    }
+  } catch (err) {
+    console.error(err)
+    alert('发起支付失败，请稍后重试')
+  }
+};
+
+function generateOrderNo(prefix = 'ORD') {
+  const now = new Date()
+  const rand = Math.floor(Math.random() * 10000).toString().padStart(4, '0')
+  return `${prefix}-${now.getFullYear()}${now.getMonth()+1}${now.getDate()}-${rand}`
+}
 </script>
 
 <style scoped>
+.date-input {
+  cursor: pointer;
+}
+.date-input:hover {
+  background-color: #f5f5f5;
+}
+/* 可选样式：增加单选框组与文本的间距 */
+.v-radio-group {
+  margin-top: 16px;
+}
+/* 单选项间距调整 */
+.v-radio {
+  margin-bottom: 8px;
+}
+
 .date-input {
   cursor: pointer;
 }

@@ -10,7 +10,7 @@ import { useDisplay } from "vuetify";
 import { useCustomizeThemeStore } from "@/stores/customizeTheme";
 import ToolbarNotifications from "./ToolbarNotifications.vue";
 import ToolbarUser from "./ToolbarUser.vue";
-
+import ThemeToggle from "./ThemeToggle.vue";
 //search
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -73,13 +73,13 @@ const color = ref('indigo')
       </div>
       <v-spacer></v-spacer>
 
-      <!-- 新增：扳手按钮 -->
+      <!-- 新增：扳手按钮 
       <v-btn
         class="ma-2"
         color="grey"
         icon="mdi-wrench"
         @click="toggleFixCard"
-      ></v-btn>
+      ></v-btn>-->
 
       <ToolbarNotifications />
       <v-btn icon @click="customizeTheme.themeDrawer = !customizeTheme.themeDrawer">
@@ -87,6 +87,7 @@ const color = ref('indigo')
       </v-btn>
 
       <div class="d-flex">
+        <ThemeToggle />
         <ToolbarUser />
       </div>
     </div>

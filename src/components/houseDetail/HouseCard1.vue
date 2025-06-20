@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useProfileStore } from "@/stores/profileStore";
+const profileStore = useProfileStore();
+const username = profileStore.user.name;
+
 // 定义props
 const props = defineProps<{
   house: any;
@@ -44,8 +48,11 @@ function onBookVisit() {
 }
 
 import { useRouter } from 'vue-router'
-
 const router = useRouter()
+const route = useRoute()
+
+// 获取当前路由的 houseid（即 /house/46 中的 46）
+const houseId = route.params.id  
 //const rentValue = "10251" // 定义租金数据
 
 const navigateToContract = () => {
@@ -53,7 +60,8 @@ const navigateToContract = () => {
     path: '/contract',
     query: { rent: form.value.price ,
             landlord: props.house.landlord,
-            phone: props.house.phone_num
+            phone: props.house.phone_num,
+            houseid: houseId 
     } // 通过query参数传递
   })
 }
@@ -207,7 +215,9 @@ try {
                     @click="navigateToContract"
                     style="cursor: pointer">立即签约！</v-chip>
                     &nbsp;&nbsp;
-      <v-chip color="red" 
+      
+                    <v-chip color="red" 
+                    v-if="username !== house.landlord"
                     variant="outlined"
                     @click="navigateToChat"
                     style="cursor: pointer">咨询房东！</v-chip>              
@@ -224,16 +234,36 @@ try {
       预约看房
     </v-btn>
 
-    
-     <v-row v-if="showDatePicker" justify="center">
-    <v-col cols="12" sm="8" md="6" class="date-picker-overlay">
+
+    <!-- 背景遮罩 -->
+  <div 
+    v-if="showDatePicker" 
+    class="date-picker-backdrop"
+    @click="showDatePicker = false"
+  ></div>
+  
+  <!-- 日期选择器 -->
+  <div v-if="showDatePicker" class="date-picker-container">
+    <v-card class="date-picker-card" elevation="10" rounded="lg">
+      <v-card-actions class="d-flex justify-end pa-0 ma-0">
+        <v-btn
+          icon="mdi-close"
+          variant="text"
+          size="small"
+          @click="showDatePicker = false"
+          class="ma-1"
+        ></v-btn>
+      </v-card-actions>
       <v-date-picker
         color="primary"
         v-model="selectedDate"
         @update:modelValue="onDateSelected"
+        class="pa-2"
+        width="100%"
       ></v-date-picker>
-    </v-col>
-  </v-row>
+    </v-card>
+  </div>
+     
 <br>
     <v-spacer></v-spacer>
     <!--<v-btn
@@ -250,6 +280,7 @@ try {
 
     </v-row>
   </v-card>
+
 </template>
 
 <style scoped>
@@ -269,4 +300,43 @@ try {
 }
 
 
+/* 日期选择器容器 */
+.date-picker-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10000 !important;/* 确保高于其他所有元素 */
+  width: 90%;
+  max-width: 600px;
+  isolation: isolate; /* 创建新的堆叠上下文 */
+}
+
+/* 日期选择卡片 */
+.date-picker-card {
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* 背景遮罩 */
+.date-picker-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999; /* 比选择器低1层 */
+}
+
+/* 响应式调整 */
+@media (max-width: 600px) {
+  .date-picker-container {
+    width: 95%;
+  }
+  .date-picker-card {
+    max-height: 80vh;
+  }
+}
 </style>

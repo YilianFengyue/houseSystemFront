@@ -43,5 +43,19 @@ const customizeTheme = useCustomizeThemeStore();
   height: 100%;
   display: flex;
   flex-direction: column;
+  width: 80%;
+  /* 使用 margin: auto 来使其在 v-main 内居中 */
+  margin-left: auto !important;  
+  margin-right: auto !important;
+  
+}
+
+@media (max-width: 959px) {
+  .main-container {
+    width: 100%; 
+    margin-left: 0 !important; 
+    margin-right: 0 !important;
+   
+  }
 }
 </style>

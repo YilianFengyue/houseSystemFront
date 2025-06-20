@@ -1,6 +1,6 @@
 <template>
-  <v-app :theme="customizeTheme.darkTheme ? 'dark' : 'light'">
-    <component :is="currentLayout" v-if="isRouterLoaded">
+  <v-app>
+    <component :is="currentLayout" v-if="isRouterLoaded" >
       <router-view> </router-view>
     </component>
     
@@ -23,6 +23,11 @@ import CustomizationMenu from "@/components/CustomizationMenu.vue";
 import { useCustomizeThemeStore } from "@/stores/customizeTheme";
 import BackToTop from "@/components/common/BackToTop.vue";
 import Snackbar from "@/components/common/Snackbar.vue";
+//主题
+import { useTheme } from "vuetify";
+const theme = useTheme();
+import { useAppStore } from "@/stores/appStore";
+const appStore = useAppStore();
 // live2d
 import Live2d from "@/components/Live2d.vue";
 import RepaireCard from "./components/RepaireCard.vue";
@@ -49,6 +54,9 @@ const currentLayout = computed(() => {
     return DefaultLayout;
   }
   return layouts[layoutName];
+});
+onMounted(() => {
+  theme.global.name.value = appStore.theme;
 });
 </script>
 

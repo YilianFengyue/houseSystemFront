@@ -42,7 +42,7 @@ export const useProfileStore = defineStore({
     },
     signon:{
       username:"Ylfmoonn",
-      password:"sfm12345",
+      password:"******",
       githubUuid:"181093978",
       avatarUrl:"https://avatars.githubusercontent.com/u/181093978?v=4",
     },
@@ -56,6 +56,13 @@ export const useProfileStore = defineStore({
     },
   }),
   actions: {
+    // 在 actions 中添加的用户头像更改
+    //-----------------------------------------------
+    updateAvatar(newAvatarUrl: string) {
+      this.user.avatarUrl = newAvatarUrl;
+      this.signon.avatarUrl = newAvatarUrl;
+      this.basic.avatar = newAvatarUrl;
+    },
     // 获取用户的 ID
     getUserId(): string {
       return this.user?.id || 'anonymous';

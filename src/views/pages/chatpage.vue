@@ -9,17 +9,17 @@
               'user-message': message.sender_username === currentUser,
               'other-message': message.sender_username !== currentUser
             }">
-              <v-avatar class="ml-4" rounded="sm" variant="elevated">
+              <v-avatar class="ml-4 mr-3" rounded="sm" variant="elevated">
                 <img :src="message.sender_username === currentUser 
-                  ? 'https://images.unsplash.com/photo-1494526585095-c41746248156' 
-                  : 'https://images.unsplash.com/photo-1494526585095-c41746248156'" 
+                  ? currentUserAvatar 
+                  : landlordAvatar" 
                   :alt="message.sender_username" />
               </v-avatar>
               <v-card class="gradient gray text-pre-wrap" theme="dark">
                 <v-card-title class="text-caption">
                   {{ message.sender_username }}
                   <span class="text-caption text-grey ml-2">
-                    {{ new Date(message.timestamp).toLocaleTimeString() }}
+                    {{ new Date(message.timestamp).toISOString().substr(11, 8) }}
                   </span>
                 </v-card-title>
                 <v-card-text>
@@ -91,15 +91,23 @@ import { useRoute } from 'vue-router';
 import { scrollToBottom } from "@/utils/common";
 import { useSnackbarStore } from "@/stores/snackbarStore";
 import io from 'socket.io-client';
+import axios from 'axios';
+import { userTokenStore } from "@/stores/token";
 
 const route = useRoute();
 const profileStore = useProfileStore();
 const snackbarStore = useSnackbarStore();
+const tokenStore = userTokenStore();
 
 // 从路由参数获取房东信息
 const landlord = ref(route.query.landlord as string || '房东');
 // 当前用户从profileStore获取
 const currentUser = ref(profileStore.user.name);
+
+// 头像相关
+const currentUserAvatar = ref('');
+const landlordAvatar = ref('');
+const avatarRefreshKey = ref(0);
 
 interface Message {
   message_id: string;
@@ -119,6 +127,53 @@ const inputRow = ref(1);
 const isLoading = ref(false);
 // 连接状态
 const isConnected = ref(true);
+
+// 默认头像URL
+const DEFAULT_AVATAR = 'http://localhost:5000/user/images/13_20250612120622.jpg';
+
+// 获取用户头像
+const fetchUserAvatar = async (username: string) => {
+  try {
+    // 1. 先根据用户名获取用户ID
+    const userResponse = await axios.get(
+      `http://localhost:5000/user/userinfo/${username}`,
+      {
+        headers: {
+          Authorization: `Bearer ${tokenStore.token}`
+        }
+      }
+    );
+    
+    if (userResponse.data.code === 200) {
+      const userId = userResponse.data.data.id;
+      
+      // 2. 根据用户ID获取头像
+      const avatarResponse = await axios.get(
+        `http://localhost:5000/user/userinfo/avatar`,
+        { 
+          params: { id: userId },
+          headers: {
+            Authorization: `Bearer ${tokenStore.token}`
+          }
+        }
+      );
+      
+      if (avatarResponse.data.code === 200 && avatarResponse.data.data.avatarUrl) {
+        return avatarResponse.data.data.avatarUrl;
+      }
+    }
+    return DEFAULT_AVATAR; // 使用指定的默认头像
+  } catch (error) {
+    console.error('获取用户头像失败:', error);
+    return DEFAULT_AVATAR; // 使用指定的默认头像
+  }
+};
+// 加载头像
+const loadAvatars = async () => {
+  currentUserAvatar.value = await fetchUserAvatar(currentUser.value);
+  landlordAvatar.value = await fetchUserAvatar(landlord.value);
+  avatarRefreshKey.value++; // 强制刷新头像
+};
 
 // 连接到服务器
 const socket = io('http://localhost:5000');
@@ -140,7 +195,12 @@ const fetchMessagesFromAPI = async () => {
   isLoading.value = true;
   try {
     const response = await fetch(
-      `http://localhost:5000/comments/messages?user1=${currentUser.value}&user2=${landlord.value}`
+      `http://localhost:5000/comments/messages?user1=${currentUser.value}&user2=${landlord.value}`,
+      {
+        headers: {
+          Authorization: `Bearer ${tokenStore.token}`
+        }
+      }
     );
     if (!response.ok) {
       throw new Error('获取消息失败');
@@ -211,6 +271,8 @@ const handleKeydown = (e: KeyboardEvent) => {
 onMounted(async () => {
   // 从API加载当前用户和房东的消息
   await fetchMessagesFromAPI();
+  // 加载用户头像
+  await loadAvatars();
 });
 </script>
 

@@ -28,10 +28,10 @@ onMounted(() => {
 <template>
   <div class="pa-5">
     <!-- 顶端放新闻组件 -->
-    <News/>
+    
     <!-- BannerPage -->
     <v-row class="flex-0" dense>
-      <v-col cols="12" xl="4">
+      <v-col cols="12" xl="4" class="full-width-banner">
         <BannerPage></BannerPage>
       </v-col>
     </v-row>
@@ -39,6 +39,9 @@ onMounted(() => {
     <v-row class="flex-0" dense>
       <v-col cols="12" xl="4">
         <CityCard></CityCard>
+      </v-col>
+      <v-col cols="12" xl="4">
+       <News/>
       </v-col>
     </v-row>
     
@@ -52,6 +55,7 @@ onMounted(() => {
       <v-col cols="12" xl="4">
         <NewHouseList></NewHouseList>
       </v-col>
+      
     </v-row>
     
     <v-row class="flex-0" dense>
@@ -73,4 +77,26 @@ onMounted(() => {
   z-index: 1000; /* 确保在最上层 */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
+
+.full-width-banner :deep(.v-card) {
+  width: 100vw !important; /* 强制宽度为100%视口宽度 */
+  margin-top: 0% !important; /* 去除顶部间距 */
+  position: relative !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+
+  /* 覆盖 v-card 可能存在的边距和圆角 */
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  border-radius: 0 !important;
+  
+  /* 保留你之前CSS中的垂直边距，如果这是你想要的效果 */
+  margin-top: 2.5rem; 
+  margin-bottom: 2.5rem;
+
+  /* 通常全屏背景 Banner 不需要额外的阴影和内边距 */
+  box-shadow: none !important;
+  padding: 0 !important; 
+}
+
 </style>

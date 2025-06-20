@@ -25,14 +25,29 @@ export default {
           icon: "mdi-view-dashboard-outline",
         },
         {
+          text: "管理员界面",
+          link: "/admin",
+          icon: "mdi-android-studio",
+        },
+        {
           text: "房源管理",
           link: "/landlord",
+          icon: "mdi-home-outline",
+        },
+        {
+          text: "房源上传",
+          link: "/landlordUpload",
           icon: "mdi-home-outline",
         },
         {
           text: "新闻管理",
           link: "/news",
           icon: "mdi-newspaper",
+        },
+        {
+          text: "新闻编辑",
+          link: "/newsEditor",
+          icon: "mdi-file-document-edit-outline",
         },
         {
           text: "测试页面",
