@@ -156,7 +156,6 @@ const updateUserInfo = async () => {
       addr: user.addr,
       email: user.email,
       phone: user.phone,
-      identityCard: user.identityCard
     });
 
     if (response.data.code === 200) {

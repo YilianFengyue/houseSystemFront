@@ -3,7 +3,7 @@
     elevation="3"
     rounded="lg"
     class="news-preview-card mx-auto"
-     
+    
   >
     <v-img
       v-if="newsItem.coverImageUrl"

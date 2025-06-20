@@ -77,6 +77,27 @@ export const routes = [
       title: "RichTextEditor",
     },
   },
+  {
+    path: "/newsList",
+    component: () => import("@/views/pages/News/editor/NewsListPage.vue"),
+    meta: {
+      requiresAuth: true,
+      layout: "landing",
+      category: "Data",
+      title: "NewsList",
+    },
+  },
+  //新闻详情页
+  {
+    path: "/newsDetail/:id",
+    component: () => import("@/views/pages/News/editor/NewsDetailPage.vue"),
+    meta: {
+      requiresAuth: true,
+      layout: "landing",
+      category: "Data",
+      title: "NewsDetail",
+    },
+  },
   //房东发布房源界面：
   {
     path: "/landlordUpload",

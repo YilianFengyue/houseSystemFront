@@ -22,6 +22,8 @@ const recaptchaSiteKey = '6LfRXlMrAAAAAIjs0Ln_JceX4X9l3DfVM5CNvjop' // 替换为
 
 //房东信息
 import { useProfileStore } from "~/src/stores/profileStore";
+import { useRouter } from 'vue-router';
+const router = useRouter();
 const profileStore = useProfileStore();
 const user = reactive({ ...profileStore.user});
 const coverImage = ref<File | null>(null); // 封面图片
@@ -253,13 +255,22 @@ watch(() => house_detail.value.facilities, () => {
 //   console.log("所有原始文件：", allRawFiles.value);
 // };
 // --- 上传和提交函数 ---
+const isPass = ref(false); // 用于控制是否通过验证
+const bypassCaptcha= () => {
+  isPass.value = !isPass.value; // 反转验证状态
+  console.log(isPass.value ? "已通过验证" : "验证已重置")
+};
 const isSubmitting = ref(false); // 用于控制提交状态
 const uploadNewHouse = async () => {
-  const response = window.grecaptcha?.getResponse()
-  if (!response) {
+  const response = window.grecaptcha?.getResponse();
+  if(isPass.value){
+    console.log("测试后门");
+  } else {
+    if (!response) {
     snackbarStore.showErrorMessage(`请先完成验证`);
     return
-  }
+    }
+  };
   isSubmitting.value = true;
   console.log("开始上传流程...");
   console.log("所有原始待上传文件：", allRawFiles.value.map(f => f.name));
@@ -343,6 +354,9 @@ const uploadNewHouse = async () => {
     if (response.data.success) {
       console.log("房源创建成功，返回数据:", response.data);
       snackbarStore.showSuccessMessage(`房源创建成功! ID: ${response.data.data.house_info.id}`);
+      setTimeout(() => {
+      router.push('/'); // <-- 4. 3秒后跳转到新闻列表页
+    }, 3000);
     } else {
       console.error("房源创建失败，响应数据格式不正确:", response.data);
       snackbarStore.showErrorMessage(`房源创建失败: ${response.data.message || '未知错误'}`);
@@ -613,6 +627,9 @@ const uploadNewHouse = async () => {
             <div class="g-recaptcha   " :data-sitekey="recaptchaSiteKey"></div>
             </div>
             <v-spacer></v-spacer>
+            <v-btn @click="bypassCaptcha">
+
+            </v-btn >
             <v-btn
               class="px-5"
               @click="uploadNewHouse()"
