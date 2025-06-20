@@ -125,7 +125,11 @@ const navigateToRent = () => {
     path: '/RentHouse'
   });
 };
-
+const navigateToRent1 = () => {
+  router.push({
+    path: '/myHouse'
+  });
+};
 // 身份证隐秘
 const rawIdCard = ref(user.identityCard || ''); // 存储原始值（无脱敏）
 const isEditingIdCard = ref(false); // 标记是否正在编辑
@@ -347,7 +351,13 @@ const submitLandlordApplication = async () => {
   }
 };
 
-
+//名字映射
+const typeMap = {
+  1: { name: '租客',   color: 'blue'   },
+  2: { name: '房东',   color: 'green'  },
+  0: { name: '管理员', color: 'red'    }
+};
+const chipInfo = computed(() => typeMap[userType.value] ?? typeMap[0]);
 //下面进行用户头像上传-------------------------------
 //计划涉及云服务上传---------------------------------
 //本地图片------------------------------------------
@@ -477,11 +487,15 @@ const triggerFileInput = () => {
       <div class="text-center mt-5">
         <h3 class="text-h6 font-weight-bold">
           {{user.name}}
-          <v-chip size="small" class="font-weight-bold" color="blue">
-            租客
-          </v-chip>
+                <v-chip
+          size="small"
+          class="font-weight-bold"
+          :color="chipInfo.color"
+        >
+          {{ chipInfo.name }}
+        </v-chip>
         </h3>
-        <p class="text-body-2">Costumer</p>
+        
       </div>
       <!-- 上传按钮（始终显示） -->
       <v-btn
@@ -489,15 +503,16 @@ const triggerFileInput = () => {
         color="primary"
         :loading="isUploading"
         @click="avatarInput?.click()"
+        disabled
       >
-        更换头像
+        更换头像(请点击头像)
       </v-btn>
     </div>
 
     <v-divider></v-divider>
     <div class="py-5 px-10">
       <v-icon color="grey"> mdi-map-marker </v-icon>
-      <span class="ml-4">{{ account.city }}</span>
+      <span class="ml-4">长沙</span>
     </div>
 
     <v-divider></v-divider>
@@ -600,6 +615,19 @@ const triggerFileInput = () => {
           <v-divider></v-divider>
           <v-card-actions class="pa-5">
             <v-spacer></v-spacer>
+           
+              <v-btn
+                class="px-5 mr-2  "
+                color="primary"
+                elevation="1"
+                variant="elevated"
+                @click="navigateToRent1"
+                v-if="userType === 2"
+              >
+                我的房源
+              </v-btn>
+            
+            
             <v-btn
               class="px-5"
               color="primary"
@@ -607,7 +635,7 @@ const triggerFileInput = () => {
               variant="elevated"
               @click="navigateToRent"
             >
-              我的房源
+              租房列表
             </v-btn>
             <v-btn
               class="px-5"

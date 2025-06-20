@@ -2,6 +2,12 @@
 import { ref, reactive, onMounted } from 'vue';
 import axios from 'axios'; // 确保你已经安装并配置了 axios
 
+import { useRouter } from 'vue-router';
+const router = useRouter();
+
+const goUserManage  = () => router.push('/userManage');
+const goTestManage2 = () => router.push('/testManagePage2');
+
 // --- 1. 类型定义 ---
 // 定义房源基本信息类型
 interface HouseInfo {
@@ -17,8 +23,10 @@ interface HouseInfo {
   landlord: string;
   phone_num: string;
   publish_time: string;
-  available: 0 | 1; // 0: 待审核/下架, 1: 已上架
+  available: 0 | 1; 
   subway: 0 | 1;
+   isavailable: 0 | 1;     // ← 上下架
+  status: 0 | 1 | 2;      // ← 房屋状态
   [key: string]: any; // 允许其他字段
 }
 
@@ -51,7 +59,8 @@ const headers = [
   { title: "价格(元/月)", key: "price", align: 'center', sortable: true },
   { title: "户型", key: "rooms", align: 'center', sortable: false },
   { title: "发布时间", key: "publish_time", align: 'center', sortable: true },
-  { title: "状态", key: "available", align: 'center', sortable: false },
+  { title: "房屋状态", key: "status", align: "center" }, 
+  { title: "上下架", key: "isavailable", align: 'center', sortable: false },
   { title: "操作", key: "actions", align: 'center', sortable: false, width: '220px' },
 ];
 
@@ -109,27 +118,20 @@ const handleSearch = () => {
 
 // 切换房源上架状态 (审核)
 const updateHouseStatus = async (house: HouseInfo) => {
-  const newStatus = house.available === 1 ? 0 : 1;
+ const newVal = house.isavailable === 1 ? 0 : 1;
+  const backup = house.isavailable;
+  house.isavailable = newVal;               // 乐观更新
   try {
-    // 乐观更新UI
-    const originalStatus = house.available;
-    house.available = newStatus;
-
-    const response = await axios.put(`${API_BASE_URL}/houseinfo/${house.id}`, {
-      available: newStatus,
-    });
-
-    if (response.data.code !== 202) { // 假设更新成功返回 202
-      // 回滚UI
-      house.available = originalStatus;
-      console.error("更新状态失败:", response.data.message);
-      // 添加错误提示
+    const res = await axios.put(
+      `${API_BASE_URL}/houseinfo/${house.id}/isavailable`,
+      { isavailable: newVal }
+    );
+    if (res.data.code !== 200 && res.data.code !== 202) {
+      throw new Error(res.data.message);
     }
-    // 可以在这里添加成功提示
-  } catch (error) {
-    console.error("更新状态时出错:", error);
-    // 回滚UI并提示错误
-    house.available = (house.available === 1 ? 0 : 1) as 0 | 1;
+  } catch (e) {
+    console.error("上下架失败:", e);
+    house.isavailable = backup;             
   }
 };
 
@@ -202,6 +204,10 @@ onMounted(() => {
           ></v-text-field>
         </div>
         <v-btn color="primary" class="ml-4" @click="handleSearch">搜索</v-btn>
+        <v-btn color="primary" variant="elevated" class="ml-2" @click="goTestManage2">
+          进入
+          <v-icon end>mdi-arrow-right</v-icon>
+        </v-btn>
       </v-card-title>
       <v-divider />
 
@@ -236,13 +242,30 @@ onMounted(() => {
             <td class="text-center font-weight-bold text-red">¥{{ item.price }}</td>
             <td class="text-center">{{ item.rooms }}</td>
             <td class="text-center">{{ item.publish_time }}</td>
+            <!-- 房屋状态 Chip -->
             <td class="text-center">
               <v-chip
-                :color="item.available === 1 ? 'green' : 'orange'"
+                :color="{
+                  0: 'grey',
+                  1: 'green',
+                  2: 'orange'
+                }[item.status]"
                 size="small"
                 label
               >
-                {{ item.available === 1 ? '已上架' : '待审核' }}
+                {{
+                  { 0: '空置', 1: '出租中', 2: '维修中' }[item.status]
+                }}
+              </v-chip>
+            </td>
+            
+            <td class="text-center">
+              <v-chip
+                :color="item.isavailable === 1 ? 'green' : 'orange'"
+                size="small"
+                label
+              >
+                {{ item.isavailable === 1 ? '已上架' : '待审核' }}
               </v-chip>
             </td>
             <td class="text-center">
@@ -250,7 +273,7 @@ onMounted(() => {
                 详情
               </v-btn>
               <v-switch
-                :model-value="item.available === 1"
+                :model-value="item.isavailable === 1"
                 @update:modelValue="updateHouseStatus(item)"
                 color="green"
                 hide-details

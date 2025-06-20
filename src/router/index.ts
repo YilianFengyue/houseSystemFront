@@ -49,6 +49,7 @@ export const routes = [
     },
     component: () => import("@/views/pages/TestManagePage2.vue"),
   },
+  
   {
     path: "/house",
     meta: {
@@ -108,6 +109,23 @@ export const routes = [
     component: () => import("@/views/pages/landlord/uploadHousePage.vue"),
   },
   {
+    path: "/landlordUpdate/:id",
+    meta: {
+      requiresAuth: true,
+      layout: "landing",
+    },
+    component: () => import("@/views/pages/landlord/updateHousePage.vue"),
+  },
+  //房东的房源
+  {
+    path: "/myHouse",
+    meta: {
+      requiresAuth: true,
+      layout: "landing",
+    },
+    component: () => import("@/views/pages/landlord/MyHouse.vue"),
+  },
+  {
     path: "/house/:id",
     meta: {
       requiresAuth: true,
@@ -122,6 +140,14 @@ export const routes = [
       layout: "landing",
     },
     component: () => import("@/views/pages/LandlordProperties.vue"),
+  },
+  {
+    path: "/userManage",
+    meta: {
+      requiresAuth: true,
+      layout: "landing",
+    },
+    component: () => import("@/views/pages/Admin/UserManagePage.vue"),
   },
     {
     path: "/news",

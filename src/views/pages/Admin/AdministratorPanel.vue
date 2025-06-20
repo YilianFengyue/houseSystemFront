@@ -7,6 +7,15 @@ import TicketsCard from "@/components/dashboard/TicketsCard.vue";
 // import TrackCard from "@/components/dashboard/TrackCard.vue";
 import TodoCard from "@/components/Administrator/TodoCard.vue";
 import TaskCard from "@/components/Administrator/ChartCard.vue";
+import UserManagePage from "./UserManagePage.vue";
+import TestManagePage2 from "../TestManagePage2.vue";
+
+//路由
+import { useRouter } from 'vue-router';
+const router = useRouter();
+
+const goUserManage  = () => router.push('/userManage');
+const goTestManage2 = () => router.push('/testManagePage2');
 </script>
 <template>
   <div class="pa-5">
@@ -47,14 +56,18 @@ import TaskCard from "@/components/Administrator/ChartCard.vue";
     <v-row class="card-shadow flex-grow-0" dense>
       <v-col cols="12" xl="6">
         <!-- Table Card-->
+          
         <v-card class="card-shadow" height="420">
-          <table-card></table-card>
+          
+          <!-- <table-card></table-card> -->
+           <User-manage-page/>
         </v-card>
       </v-col>
       <v-col cols="12" xl="6">
         <!-- Task Card-->
         <v-card class="card-shadow" height="420">
-          <task-card></task-card>
+          
+          <TestManagePage2/>
         </v-card>
       </v-col>
     </v-row>
@@ -64,9 +77,9 @@ import TaskCard from "@/components/Administrator/ChartCard.vue";
     <v-row class="card-shadow flex-grow-0" dense>
       <v-col cols="12" xl="6">
         <!-- Target Card-->
-        <v-card class="card-shadow" height="420"
+        <!-- <v-card class="card-shadow" height="420"
           ><todo-card></todo-card
-        ></v-card>
+        ></v-card> -->
       </v-col>
       <v-col cols="12" xl="6">
         <v-card class="card-shadow" height="420"
